@@ -1,14 +1,20 @@
 .root {
-    -fx-font-family: "Segoe UI", "Roboto", "Sans-Serif";
-    -fx-background-color: linear-gradient(to bottom, #111827, #020617);
+    -fx-font-family: "Inter", "Segoe UI", "Roboto", "Sans-Serif";
+    -fx-background-color: #f1f2f6;
+}
+
+.card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 16, 0.3, 0, 4);
 }
 
 /* Меню */
 .menu-bar {
-    -fx-background-color: linear-gradient(#020617, #111827);
-    -fx-padding: 4 10 4 10;
-    -fx-border-color: #020617 #020617 #1f2937 #020617;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 12, 0.3, 0, 3);
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 6 10 6 10;
 }
 
 .menu-bar .label {
@@ -39,16 +45,15 @@
 
 /* Дисплей калькулятора (Label с fx:id="display") */
 .label#display {
-    -fx-background-color: rgba(15, 23, 42, 0.9);
-    -fx-text-fill: #f9fafb;
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #111827;
     -fx-font-size: 28px;
-    -fx-font-weight: bold;
-    -fx-padding: 18;
-    -fx-border-color: #4b5563;
-    -fx-border-width: 1;
-    -fx-border-radius: 14;
-    -fx-background-radius: 14;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 12, 0.4, 0, 3);
+    -fx-font-weight: 600;
+    -fx-padding: 12;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0.25, 0, 2);
 }
 
 /* Строка выражения и история */
@@ -67,68 +72,65 @@
     -fx-opacity: 0.85;
 }
 
+/* сегменты */
+.segment {
+    -fx-background-color: #f3f4f6;
+    -fx-text-fill: #4b5563;
+    -fx-font-weight: 600;
+    -fx-padding: 8 14 8 14;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #e5e7eb;
+}
+.segment-active {
+    -fx-background-color: #eef2ff;
+    -fx-text-fill: #4338ca;
+    -fx-border-color: #c7d2fe;
+}
+.segment-rad {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #4338ca;
+}
+
 /* Кнопки */
 .button {
-    -fx-background-color: linear-gradient(#374151, #1f2937);
-    -fx-text-fill: #e5e7eb;
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 12;
-    -fx-border-radius: 12;
-    -fx-border-color: rgba(15, 23, 42, 0.7);
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1f2937;
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #e5e7eb;
     -fx-border-width: 1;
-    -fx-padding: 10 16 10 16;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 10, 0.4, 0, 2);
+    -fx-padding: 8 0 8 0;
 }
+.button:hover { -fx-background-color: #f3f4f6; }
+.button:pressed { -fx-background-color: #e5e7eb; }
 
-.button:hover {
-    -fx-background-color: linear-gradient(#4b5563, #1f2937);
+/* функциональные (фиолетовые) */
+.btn-ghost {
+    -fx-background-color: #eef2ff;
+    -fx-text-fill: #4338ca;
+    -fx-border-color: #dfe4ff;
 }
+.btn-ghost:hover { -fx-background-color: #e0e7ff; }
 
-.button:pressed {
-    -fx-background-color: #0f172a;
-    -fx-effect: none;
+/* акцент (=) */
+.btn-accent {
+    -fx-background-color: #4338ca;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #4338ca;
 }
+.btn-accent:hover { -fx-background-color: #4f46e5; }
+.btn-accent:pressed { -fx-background-color: #3730a3; }
 
 /* Контейнеры */
 .grid-pane {
-    -fx-hgap: 6;
-    -fx-vgap: 6;
-    -fx-padding: 10 0 0 0;
+    -fx-hgap: 8;
+    -fx-vgap: 8;
+    -fx-padding: 4 0 0 0;
 }
-
-.v-box {
-    -fx-spacing: 14;
-    -fx-padding: 16;
-}
-
-/* Выпадающее меню */
-.context-menu {
-    -fx-background-color: linear-gradient(#020617, #0f172a);
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-    -fx-border-color: #111827;
-    -fx-border-width: 1;
-    -fx-padding: 4 0 4 0;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.75), 16, 0.45, 0, 4);
-}
-
-/* Пункты выпадающего меню */
-.menu-item {
-    -fx-padding: 4 18 4 18;
-}
-
-.menu-item .label {
-    -fx-text-fill: #e5e7eb;
-    -fx-font-size: 12px;
-}
-
-/* Ховер/фокус в выпадающем меню */
-.menu-item:focused {
-    -fx-background-color: linear-gradient(#1f2937, #0f172a);
-}
-
-.menu-item:focused .label {
-    -fx-text-fill: #fbbf24;
+.grid-pane .button {
+    -fx-max-width: Infinity;
+    -fx-pref-height: 38;
 }
