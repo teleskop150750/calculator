@@ -17,7 +17,12 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("primary"), 640, 480);
+        scene = new Scene(loadFXML("primary"), 360, 520);
+        scene.getStylesheets().add(
+                App.class.getResource("style.css").toExternalForm()
+        );
+        stage.setTitle("FX Calc");
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }
