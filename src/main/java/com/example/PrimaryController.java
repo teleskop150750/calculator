@@ -1,6 +1,8 @@
 package com.example;
 
 import java.io.IOException;
+import java.util.LinkedList;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
@@ -13,10 +15,18 @@ public class PrimaryController {
     @FXML
     private Label display;
 
+    @FXML
+    private Label expressionLabel;
+
+    @FXML
+    private Label historyLabel;
+
     // внутреннее состояние калькулятора
     private double firstOperand = 0.0;
     private String pendingOperation = "";
     private boolean startNewNumber = true;
+
+    private final LinkedList<String> history = new LinkedList<>();
 
     // обработчик меню "О программе" (переход на экран secondary.fxml)
     @FXML
@@ -40,6 +50,7 @@ public class PrimaryController {
         } else {
             display.setText(display.getText() + value);
         }
+        updateExpression();
     }
 
     // обработчик нажатия операций (+, -, *, /)
@@ -50,6 +61,7 @@ public class PrimaryController {
             firstOperand = Double.parseDouble(display.getText());
             pendingOperation = op;
             startNewNumber = true;
+            updateExpression();
         }
     }
 
@@ -80,6 +92,9 @@ public class PrimaryController {
                     display.setText("Ошибка");
                     pendingOperation = "";
                     startNewNumber = true;
+                    if (expressionLabel != null) {
+                        expressionLabel.setText("");
+                    }
                     return;
                 }
                 result = firstOperand / secondOperand;
@@ -88,9 +103,16 @@ public class PrimaryController {
                 return;
         }
 
+        String operationText = formatResult(firstOperand) + " " + pendingOperation + " " + formatResult(secondOperand);
         display.setText(formatResult(result));
+        addToHistory(operationText + " = " + display.getText());
         pendingOperation = "";
         startNewNumber = true;
+
+        if (expressionLabel != null) {
+            expressionLabel.setText("");
+        }
+        updateHistoryLabel();
     }
 
     // обработчик "C" (сброс)
@@ -100,6 +122,51 @@ public class PrimaryController {
         firstOperand = 0.0;
         pendingOperation = "";
         startNewNumber = true;
+        if (expressionLabel != null) {
+            expressionLabel.setText("");
+        }
+    }
+
+    private void updateExpression() {
+        if (display == null || expressionLabel == null) {
+            return;
+        }
+        if ("Ошибка".equals(display.getText())) {
+            expressionLabel.setText("");
+            return;
+        }
+
+        if (pendingOperation.isEmpty()) {
+            // только ввод числа, без операции
+            expressionLabel.setText(display.getText());
+        } else if (startNewNumber) {
+            // набрали первый операнд и операцию: "5 +"
+            expressionLabel.setText(formatResult(firstOperand) + " " + pendingOperation);
+        } else {
+            // набираем второй операнд: "5 + 8"
+            expressionLabel.setText(formatResult(firstOperand) + " " + pendingOperation + " " + display.getText());
+        }
+    }
+
+    private void addToHistory(String entry) {
+        history.addFirst(entry);
+        while (history.size() > 3) {
+            history.removeLast();
+        }
+    }
+
+    private void updateHistoryLabel() {
+        if (historyLabel == null) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String line : history) {
+            if (sb.length() > 0) {
+                sb.append('\n');
+            }
+            sb.append(line);
+        }
+        historyLabel.setText(sb.toString());
     }
 
     private String formatResult(double value) {

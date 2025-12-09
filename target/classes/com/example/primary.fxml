@@ -34,6 +34,17 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
             <children>
+                <Label fx:id="historyLabel"
+                       text=""
+                       maxWidth="Infinity"
+                       alignment="CENTER_RIGHT"
+                       wrapText="true"/>
+
+                <Label fx:id="expressionLabel"
+                       text=""
+                       maxWidth="Infinity"
+                       alignment="CENTER_RIGHT"/>
+
                 <Label fx:id="display"
                        text="0"
                        maxWidth="Infinity"
