@@ -39,8 +39,8 @@
                 <Label fx:id="historyLabel"
                        text=""
                        maxWidth="Infinity"
-                       minHeight="54"
-                       maxHeight="54"
+                       minHeight="78"
+                       maxHeight="78"
                        alignment="TOP_RIGHT"
                        wrapText="true"
                        styleClass="history-label"/>

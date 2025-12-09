@@ -1,38 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Button?>
 <?import javafx.geometry.Insets?>
-<?import javafx.geometry.Pos?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.example.SecondaryController">
 
+    <top>
+        <MenuBar>
+            <menus>
+                <Menu text="Меню">
+                    <items>
+                        <MenuItem text="Главная" onAction="#switchToPrimary"/>
+                        <MenuItem text="Выход" onAction="#onExit"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+
     <center>
-        <Label text="Простой калькулятор на JavaFX.
-
-Функции:
-- сложение, вычитание, умножение и деление;
-- обработка деления на ноль (сообщение 'Ошибка').
-
-Автор: вы."
-               wrapText="true"
-               BorderPane.alignment="CENTER">
+        <VBox spacing="20" alignment="CENTER" styleClass="card about-card" BorderPane.alignment="CENTER">
             <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
+                <Insets top="30" right="30" bottom="30" left="30"/>
             </padding>
-        </Label>
-    </center>
+            <children>
+                <Label text="FX Calc" styleClass="about-title"/>
+                
+                <Label text="Научный калькулятор на JavaFX"
+                       styleClass="about-subtitle"
+                       wrapText="true"/>
 
-    <bottom>
-        <Button text="Назад"
-                onAction="#switchToPrimary"
-                BorderPane.alignment="CENTER">
-            <BorderPane.margin>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </BorderPane.margin>
-        </Button>
-    </bottom>
+                <VBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <Label text="Функции:" styleClass="about-section"/>
+                        <Label text="• Основные операции: +, −, ×, ÷"
+                               styleClass="about-text" wrapText="true"/>
+                        <Label text="• Тригонометрия: sin, cos, tan, cot"
+                               styleClass="about-text" wrapText="true"/>
+                        <Label text="• Логарифмы: ln, log"
+                               styleClass="about-text" wrapText="true"/>
+                        <Label text="• Функции: √, x^y, n!, abs, exp"
+                               styleClass="about-text" wrapText="true"/>
+                        <Label text="• Константы: π, e"
+                               styleClass="about-text" wrapText="true"/>
+                        <Label text="• Скобки и история вычислений"
+                               styleClass="about-text" wrapText="true"/>
+                    </children>
+                </VBox>
+
+                <Label text="Версия 1.0" styleClass="about-version"/>
+                
+                <Button text="← Назад" 
+                        onAction="#switchToPrimary"
+                        styleClass="btn-back"/>
+            </children>
+        </VBox>
+    </center>
 </BorderPane>
