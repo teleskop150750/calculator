@@ -39,8 +39,11 @@
                 <Label fx:id="historyLabel"
                        text=""
                        maxWidth="Infinity"
-                       alignment="CENTER_RIGHT"
-                       wrapText="true"/>
+                       minHeight="54"
+                       maxHeight="54"
+                       alignment="TOP_RIGHT"
+                       wrapText="true"
+                       styleClass="history-label"/>
 
                 <Label fx:id="display"
                        text="0"
@@ -126,7 +129,7 @@
 
                         <!-- Row 6 -->
                         <Button text="0" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                        <Button text=""  disable="true"         maxWidth="Infinity" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                        <Button text="." onAction="#onDecimalPoint" maxWidth="Infinity" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
                         <Button text="=" onAction="#onEquals"   styleClass="btn-accent" maxWidth="Infinity" GridPane.rowIndex="6" GridPane.columnIndex="2">
                             <tooltip><Tooltip text="Равно / вычислить"/></tooltip>
                         </Button>

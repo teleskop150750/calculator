@@ -47,7 +47,7 @@
 .label#display {
     -fx-background-color: #ffffff;
     -fx-text-fill: #111827;
-    -fx-font-size: 28px;
+    -fx-font-size: 16px;
     -fx-font-weight: 600;
     -fx-padding: 12;
     -fx-border-color: #e5e7eb;
@@ -57,19 +57,24 @@
 }
 
 /* Строка выражения и история */
-#expressionLabel {
-    -fx-text-fill: #e5e7eb;
-    -fx-font-size: 16px;
-    -fx-padding: 2 8 0 8;
-    -fx-opacity: 0.9;
-}
-
 #historyLabel {
     -fx-text-fill: #9ca3af;
     -fx-font-size: 11px;
     -fx-padding: 4 8 0 8;
     -fx-text-alignment: right;
     -fx-opacity: 0.85;
+}
+
+.history-label {
+    -fx-background-color: #f8f9fa;
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 11px;
+    -fx-padding: 8;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-opacity: 0.95;
+    -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
 }
 
 /* сегменты */
@@ -96,7 +101,7 @@
 .button {
     -fx-background-color: #ffffff;
     -fx-text-fill: #1f2937;
-    -fx-font-size: 16px;
+    -fx-font-size: 14px;
     -fx-font-weight: 600;
     -fx-background-radius: 10;
     -fx-border-radius: 10;

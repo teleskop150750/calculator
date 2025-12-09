@@ -52,14 +52,28 @@ public class PrimaryController {
         updateExpression();
     }
 
+    @FXML
+    private void onDecimalPoint() {
+        if ("Ошибка".equals(display.getText())) return;
+        if (startNewNumber) {
+            currentInput = "0.";
+            startNewNumber = false;
+        } else if (!currentInput.contains(".")) {
+            currentInput += ".";
+        }
+        updateExpression();
+    }
+
     // обработчик нажатия операций (+, -, *, /)
     @FXML
     private void onOperator(ActionEvent event) {
         String op = ((Button) event.getSource()).getText();
-        if ("Ошибка".equals(display.getText()))
-            return;
+        if ("Ошибка".equals(display.getText())) return;
 
-        if (!startNewNumber) {
+        // нормализация минуса
+        if ("−".equals(op)) op = "-";
+
+        if (!startNewNumber && !currentInput.isEmpty()) {
             tokens.add(currentInput);
             startNewNumber = true;
         }
@@ -70,7 +84,7 @@ public class PrimaryController {
             } else {
                 tokens.add(op);
             }
-        } else {
+        } else if (!currentInput.isEmpty()) {
             tokens.add(currentInput);
             tokens.add(op);
             startNewNumber = true;
@@ -144,13 +158,17 @@ public class PrimaryController {
         String fn = ((Button) event.getSource()).getText();
         if ("Ошибка".equals(display.getText())) return;
 
-        double val = Double.parseDouble(currentInput);
-        Double res = applyUnary(fn, val);
-        if (res == null) return;
+        try {
+            double val = Double.parseDouble(currentInput);
+            Double res = applyUnary(fn, val);
+            if (res == null) return;
 
-        currentInput = formatResult(res);
-        startNewNumber = false;
-        updateExpression();
+            currentInput = formatResult(res);
+            startNewNumber = false;
+            updateExpression();
+        } catch (NumberFormatException e) {
+            errorAndReset();
+        }
     }
 
     private void updateExpression() {
@@ -175,8 +193,7 @@ public class PrimaryController {
     }
 
     private Double evaluateTokens(List<String> tks) {
-        if (tks.isEmpty())
-            return null;
+        if (tks.isEmpty()) return null;
         try {
             List<String> output = new ArrayList<>();
             Deque<String> ops = new ArrayDeque<>();
@@ -193,29 +210,25 @@ public class PrimaryController {
                     while (!ops.isEmpty() && !"(".equals(ops.peek())) {
                         output.add(ops.pop());
                     }
-                    if (ops.isEmpty() || !"(".equals(ops.peek()))
-                        return errorAndReset();
+                    if (ops.isEmpty() || !"(".equals(ops.peek())) return errorAndReset();
                     ops.pop();
                 } else {
                     output.add(tk);
                 }
             }
             while (!ops.isEmpty()) {
-                if ("(".equals(ops.peek()))
-                    return errorAndReset();
+                if ("(".equals(ops.peek())) return errorAndReset();
                 output.add(ops.pop());
             }
 
             Deque<Double> stack = new ArrayDeque<>();
             for (String tk : output) {
                 if (isOperator(tk)) {
-                    if (stack.size() < 2)
-                        return errorAndReset();
+                    if (stack.size() < 2) return errorAndReset();
                     double b = stack.pop();
                     double a = stack.pop();
                     Double res = applyOperation(a, b, tk);
-                    if (res == null)
-                        return null;
+                    if (res == null) return null;
                     stack.push(res);
                 } else {
                     stack.push(Double.parseDouble(tk));
@@ -237,11 +250,15 @@ public class PrimaryController {
     }
 
     private int precedence(String op) {
-        return ("+".equals(op) || "-".equals(op)) ? 1 : 2;
+        if ("+".equals(op) || "-".equals(op)) {
+            return 1;
+        }
+        return 2;
     }
 
     private boolean isOperator(String s) {
-        return "+".equals(s) || "-".equals(s) || "*".equals(s) || "×".equals(s) || "/".equals(s) || "÷".equals(s);
+        return "+".equals(s) || "-".equals(s) 
+            || "*".equals(s) || "×".equals(s) || "/".equals(s) || "÷".equals(s);
     }
 
     private String lastToken() {
@@ -282,13 +299,14 @@ public class PrimaryController {
     private Double applyUnary(String fn, double v) {
         try {
             switch (fn) {
-                case "sin": return Math.sin(v);
-                case "cos": return Math.cos(v);
-                case "tan": return Math.tan(v);
+                case "sin": return Math.sin(Math.toRadians(v));
+                case "cos": return Math.cos(Math.toRadians(v));
+                case "tan": return Math.tan(Math.toRadians(v));
                 case "cot":
-                    double t = Math.tan(v);
-                    if (t == 0) return errorAndReset();
-                    return 1.0 / t;
+                    double rad = Math.toRadians(v);
+                    double tanVal = Math.tan(rad);
+                    if (Math.abs(tanVal) < 1e-10) return errorAndReset();
+                    return 1.0 / tanVal;
                 case "ln":
                     if (v <= 0) return errorAndReset();
                     return Math.log(v);
@@ -317,10 +335,11 @@ public class PrimaryController {
     }
 
     private String formatResult(double value) {
+        if (Math.abs(value) < 1e-10) value = 0;
         if (value == (long) value) {
             return String.format("%d", (long) value);
         }
-        return String.valueOf(value);
+        return String.format("%.8f", value).replaceAll("0+$", "").replaceAll("\\.$", "");
     }
 
     private void addToHistory(String entry) {
