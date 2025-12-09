@@ -40,11 +40,6 @@
                        alignment="CENTER_RIGHT"
                        wrapText="true"/>
 
-                <Label fx:id="expressionLabel"
-                       text=""
-                       maxWidth="Infinity"
-                       alignment="CENTER_RIGHT"/>
-
                 <Label fx:id="display"
                        text="0"
                        maxWidth="Infinity"

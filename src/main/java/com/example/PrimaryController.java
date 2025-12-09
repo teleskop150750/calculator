@@ -2,34 +2,28 @@ package com.example;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.LinkedList;
 
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Button;
+import javafx.event.ActionEvent;
+import javafx.application.Platform;
 
 public class PrimaryController {
 
-    // дисплей калькулятора
     @FXML
     private Label display;
 
     @FXML
-    private Label expressionLabel;
-
-    @FXML
     private Label historyLabel;
 
-    // внутреннее состояние калькулятора
-    private double firstOperand = 0.0; // можно удалить, но оставляем для совместимости
-    private String pendingOperation = "";
     private boolean startNewNumber = true;
-
     private final LinkedList<String> history = new LinkedList<>();
     private final List<String> tokens = new ArrayList<>();
+    private String currentInput = "0";
+    private String pendingOperation = "";
 
     // обработчик меню "О программе" (переход на экран secondary.fxml)
     @FXML
@@ -48,10 +42,10 @@ public class PrimaryController {
     private void onDigit(ActionEvent event) {
         String value = ((Button) event.getSource()).getText();
         if (startNewNumber || "Ошибка".equals(display.getText())) {
-            display.setText(value);
+            currentInput = value;
             startNewNumber = false;
         } else {
-            display.setText(display.getText() + value);
+            currentInput += value;
         }
         updateExpression();
     }
@@ -64,20 +58,22 @@ public class PrimaryController {
             return;
 
         if (!startNewNumber) {
-            tokens.add(display.getText()); // текущий операнд
+            tokens.add(currentInput);
             startNewNumber = true;
         }
+
         if (!tokens.isEmpty()) {
             if (isOperator(lastToken())) {
-                tokens.set(tokens.size() - 1, op); // меняем знак операции
+                tokens.set(tokens.size() - 1, op);
             } else {
-                tokens.add(op); // добавляем операцию
+                tokens.add(op);
             }
-        } else if (!display.getText().isEmpty()) {
-            tokens.add(display.getText());
+        } else {
+            tokens.add(currentInput);
             tokens.add(op);
             startNewNumber = true;
         }
+
         pendingOperation = op;
         updateExpression();
     }
@@ -87,9 +83,8 @@ public class PrimaryController {
     private void onEquals() {
         if ("Ошибка".equals(display.getText()))
             return;
-        if (!startNewNumber) {
-            tokens.add(display.getText());
-        }
+        if (!startNewNumber)
+            tokens.add(currentInput);
         if (tokens.isEmpty())
             return;
         if (isOperator(lastToken()))
@@ -102,11 +97,11 @@ public class PrimaryController {
         String exprText = String.join(" ", tokens);
         display.setText(formatResult(result));
         addToHistory(exprText + " = " + display.getText());
+
+        currentInput = display.getText();
         tokens.clear();
         pendingOperation = "";
         startNewNumber = true;
-        if (expressionLabel != null)
-            expressionLabel.setText("");
         updateHistoryLabel();
     }
 
@@ -117,29 +112,28 @@ public class PrimaryController {
         tokens.clear();
         pendingOperation = "";
         startNewNumber = true;
-        if (expressionLabel != null)
-            expressionLabel.setText("");
+        currentInput = "0";
     }
 
     private void updateExpression() {
-        if (display == null || expressionLabel == null)
+        if (display == null)
             return;
         if ("Ошибка".equals(display.getText())) {
-            expressionLabel.setText("");
+            display.setText("Ошибка");
             return;
         }
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < tokens.size(); i++) {
+            if (i > 0)
+                sb.append(" ");
             sb.append(tokens.get(i));
-            if (i < tokens.size() - 1)
-                sb.append(" ");
         }
-        if (!startNewNumber) {
-            if (!tokens.isEmpty())
+        if (!startNewNumber || tokens.isEmpty()) {
+            if (sb.length() > 0)
                 sb.append(" ");
-            sb.append(display.getText());
+            sb.append(currentInput);
         }
-        expressionLabel.setText(sb.toString());
+        display.setText(sb.length() == 0 ? currentInput : sb.toString());
     }
 
     private Double evaluateTokens(List<String> tks) {
@@ -158,10 +152,10 @@ public class PrimaryController {
             return acc;
         } catch (Exception ex) {
             display.setText("Ошибка");
+            tokens.clear();
             pendingOperation = "";
             startNewNumber = true;
-            if (expressionLabel != null)
-                expressionLabel.setText("");
+            currentInput = "0";
             return null;
         }
     }
@@ -191,10 +185,10 @@ public class PrimaryController {
             case "÷":
                 if (right == 0) {
                     display.setText("Ошибка");
+                    tokens.clear();
                     pendingOperation = "";
                     startNewNumber = true;
-                    if (expressionLabel != null)
-                        expressionLabel.setText("");
+                    currentInput = "0";
                     return null;
                 }
                 result = left / right;
@@ -203,6 +197,13 @@ public class PrimaryController {
                 return null;
         }
         return result;
+    }
+
+    private String formatResult(double value) {
+        if (value == (long) value) {
+            return String.format("%d", (long) value);
+        }
+        return String.valueOf(value);
     }
 
     private void addToHistory(String entry) {
@@ -224,12 +225,5 @@ public class PrimaryController {
             sb.append(line);
         }
         historyLabel.setText(sb.toString());
-    }
-
-    private String formatResult(double value) {
-        if (value == (long) value) {
-            return String.format("%d", (long) value);
-        }
-        return String.valueOf(value);
     }
 }
