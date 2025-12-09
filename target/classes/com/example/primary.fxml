@@ -71,8 +71,8 @@
                         <Button text="tan" onAction="#onFunction" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="0" GridPane.columnIndex="2">
                             <tooltip><Tooltip text="Тангенс"/></tooltip>
                         </Button>
-                        <Button text="exp" onAction="#onFunction" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="0" GridPane.columnIndex="3">
-                            <tooltip><Tooltip text="Экспонента e^x"/></tooltip>
+                        <Button text="cot" onAction="#onFunction" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="0" GridPane.columnIndex="3">
+                            <tooltip><Tooltip text="Котангенс"/></tooltip>
                         </Button>
 
                         <!-- Row 1 -->
@@ -85,56 +85,70 @@
                         <Button text="√"   onAction="#onFunction" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="2">
                             <tooltip><Tooltip text="Квадратный корень"/></tooltip>
                         </Button>
-                        <Button text="n!"  onAction="#onFunction" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="3">
-                            <tooltip><Tooltip text="Факториал"/></tooltip>
+                        <Button text="x^y" onAction="#onPower"    styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="3">
+                            <tooltip><Tooltip text="Возведение в степень"/></tooltip>
                         </Button>
 
                         <!-- Row 2 -->
-                        <Button text="abs" onAction="#onFunction" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="0">
+                        <Button text="n!"  onAction="#onFunction" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="0">
+                            <tooltip><Tooltip text="Факториал"/></tooltip>
+                        </Button>
+                        <Button text="abs" onAction="#onFunction" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1">
                             <tooltip><Tooltip text="Модуль числа"/></tooltip>
                         </Button>
-                        <Button text="("   onAction="#onParen"    styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1">
-                            <tooltip><Tooltip text="Открывающая скобка"/></tooltip>
+                        <Button text="π"   onAction="#onConstant" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="2">
+                            <tooltip><Tooltip text="Число π"/></tooltip>
                         </Button>
-                        <Button text=")"   onAction="#onParen"    styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="2">
-                            <tooltip><Tooltip text="Закрывающая скобка"/></tooltip>
-                        </Button>
-                        <Button text="C"   onAction="#onClear"    styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="3">
-                            <tooltip><Tooltip text="Сбросить выражение"/></tooltip>
+                        <Button text="e"   onAction="#onConstant" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="3">
+                            <tooltip><Tooltip text="Число e"/></tooltip>
                         </Button>
 
                         <!-- Row 3 -->
-                        <Button text="7" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                        <Button text="8" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-                        <Button text="9" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                        <Button text="("   onAction="#onParen"    styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="3" GridPane.columnIndex="0">
+                            <tooltip><Tooltip text="Открывающая скобка"/></tooltip>
+                        </Button>
+                        <Button text=")"   onAction="#onParen"    styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                            <tooltip><Tooltip text="Закрывающая скобка"/></tooltip>
+                        </Button>
+                        <Button text="C"   onAction="#onClear"    styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="3" GridPane.columnIndex="2">
+                            <tooltip><Tooltip text="Сбросить выражение"/></tooltip>
+                        </Button>
                         <Button text="÷" onAction="#onOperator" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="3" GridPane.columnIndex="3">
                             <tooltip><Tooltip text="Деление"/></tooltip>
                         </Button>
 
                         <!-- Row 4 -->
-                        <Button text="4" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                        <Button text="5" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-                        <Button text="6" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
+                        <Button text="7" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                        <Button text="8" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                        <Button text="9" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
                         <Button text="×" onAction="#onOperator" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="3">
                             <tooltip><Tooltip text="Умножение"/></tooltip>
                         </Button>
 
                         <!-- Row 5 -->
-                        <Button text="1" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                        <Button text="2" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
-                        <Button text="3" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="5" GridPane.columnIndex="2"/>
+                        <Button text="4" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                        <Button text="5" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                        <Button text="6" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="5" GridPane.columnIndex="2"/>
                         <Button text="−" onAction="#onOperator" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="5" GridPane.columnIndex="3">
                             <tooltip><Tooltip text="Вычитание"/></tooltip>
                         </Button>
 
                         <!-- Row 6 -->
-                        <Button text="0" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                        <Button text="." onAction="#onDecimalPoint" maxWidth="Infinity" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
-                        <Button text="=" onAction="#onEquals"   styleClass="btn-accent" maxWidth="Infinity" GridPane.rowIndex="6" GridPane.columnIndex="2">
-                            <tooltip><Tooltip text="Равно / вычислить"/></tooltip>
-                        </Button>
+                        <Button text="1" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                        <Button text="2" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                        <Button text="3" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="6" GridPane.columnIndex="2"/>
                         <Button text="+" onAction="#onOperator" styleClass="btn-ghost"  maxWidth="Infinity" GridPane.rowIndex="6" GridPane.columnIndex="3">
                             <tooltip><Tooltip text="Сложение"/></tooltip>
+                        </Button>
+
+                        <!-- Row 7 -->
+                        <Button text="0" onAction="#onDigit" maxWidth="Infinity" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                        <Button text="." onAction="#onDecimalPoint" maxWidth="Infinity" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+                        <Button text="=" onAction="#onEquals"   styleClass="btn-accent" maxWidth="Infinity" GridPane.rowIndex="7" GridPane.columnIndex="2">
+                            <tooltip><Tooltip text="Равно / вычислить"/></tooltip>
+                        </Button>
+                        <Button text="exp" onAction="#onFunction" styleClass="btn-ghost"  maxWidth="Infinity" GridPane.rowIndex="7" GridPane.columnIndex="3">
+                            <tooltip><Tooltip text="Экспонента e^x"/></tooltip>
                         </Button>
                     </children>
                 </GridPane>

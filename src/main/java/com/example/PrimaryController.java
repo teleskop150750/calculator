@@ -171,6 +171,52 @@ public class PrimaryController {
         }
     }
 
+    @FXML
+    private void onConstant(ActionEvent event) {
+        String constant = ((Button) event.getSource()).getText();
+        if ("Ошибка".equals(display.getText())) {
+            display.setText("0");
+            tokens.clear();
+            pendingOperation = "";
+            startNewNumber = true;
+            currentInput = "0";
+        }
+
+        if ("π".equals(constant)) {
+            currentInput = String.valueOf(Math.PI);
+        } else if ("e".equals(constant)) {
+            currentInput = String.valueOf(Math.E);
+        }
+        startNewNumber = false;
+        updateExpression();
+    }
+
+    @FXML
+    private void onPower(ActionEvent event) {
+        String op = "^";
+        if ("Ошибка".equals(display.getText())) return;
+
+        if (!startNewNumber && !currentInput.isEmpty()) {
+            tokens.add(currentInput);
+            startNewNumber = true;
+        }
+
+        if (!tokens.isEmpty()) {
+            if (isOperator(lastToken()) || "^".equals(lastToken())) {
+                tokens.set(tokens.size() - 1, op);
+            } else {
+                tokens.add(op);
+            }
+        } else if (!currentInput.isEmpty()) {
+            tokens.add(currentInput);
+            tokens.add(op);
+            startNewNumber = true;
+        }
+
+        pendingOperation = op;
+        updateExpression();
+    }
+
     private void updateExpression() {
         if (display == null)
             return;
@@ -198,8 +244,8 @@ public class PrimaryController {
             List<String> output = new ArrayList<>();
             Deque<String> ops = new ArrayDeque<>();
             for (String tk : tks) {
-                if (isOperator(tk)) {
-                    while (!ops.isEmpty() && isOperator(ops.peek()) &&
+                if (isOperator(tk) || "^".equals(tk)) {
+                    while (!ops.isEmpty() && (isOperator(ops.peek()) || "^".equals(ops.peek())) &&
                            precedence(ops.peek()) >= precedence(tk)) {
                         output.add(ops.pop());
                     }
@@ -223,7 +269,7 @@ public class PrimaryController {
 
             Deque<Double> stack = new ArrayDeque<>();
             for (String tk : output) {
-                if (isOperator(tk)) {
+                if (isOperator(tk) || "^".equals(tk)) {
                     if (stack.size() < 2) return errorAndReset();
                     double b = stack.pop();
                     double a = stack.pop();
@@ -250,6 +296,7 @@ public class PrimaryController {
     }
 
     private int precedence(String op) {
+        if ("^".equals(op)) return 3;
         if ("+".equals(op) || "-".equals(op)) {
             return 1;
         }
@@ -289,6 +336,9 @@ public class PrimaryController {
                     return null;
                 }
                 result = left / right;
+                break;
+            case "^":
+                result = Math.pow(left, right);
                 break;
             default:
                 return null;
