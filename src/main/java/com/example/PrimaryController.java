@@ -1,9 +1,11 @@
 package com.example;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -115,6 +117,28 @@ public class PrimaryController {
         currentInput = "0";
     }
 
+    @FXML
+    private void onParen(ActionEvent event) {
+        String p = ((Button) event.getSource()).getText();
+        if ("Ошибка".equals(display.getText()))
+            return;
+
+        if ("(".equals(p)) {
+            if (!startNewNumber) {
+                tokens.add(currentInput);
+                startNewNumber = true;
+            }
+            tokens.add("(");
+        } else {
+            if (!startNewNumber) {
+                tokens.add(currentInput);
+                startNewNumber = true;
+            }
+            tokens.add(")");
+        }
+        updateExpression();
+    }
+
     private void updateExpression() {
         if (display == null)
             return;
@@ -140,24 +164,66 @@ public class PrimaryController {
         if (tks.isEmpty())
             return null;
         try {
-            double acc = Double.parseDouble(tks.get(0));
-            for (int i = 1; i < tks.size(); i += 2) {
-                String op = tks.get(i);
-                double right = Double.parseDouble(tks.get(i + 1));
-                Double res = applyOperation(acc, right, op);
-                if (res == null)
-                    return null;
-                acc = res;
+            List<String> output = new ArrayList<>();
+            Deque<String> ops = new ArrayDeque<>();
+            for (String tk : tks) {
+                if (isOperator(tk)) {
+                    while (!ops.isEmpty() && isOperator(ops.peek()) &&
+                           precedence(ops.peek()) >= precedence(tk)) {
+                        output.add(ops.pop());
+                    }
+                    ops.push(tk);
+                } else if ("(".equals(tk)) {
+                    ops.push(tk);
+                } else if (")".equals(tk)) {
+                    while (!ops.isEmpty() && !"(".equals(ops.peek())) {
+                        output.add(ops.pop());
+                    }
+                    if (ops.isEmpty() || !"(".equals(ops.peek()))
+                        return errorAndReset();
+                    ops.pop();
+                } else {
+                    output.add(tk);
+                }
             }
-            return acc;
-        } catch (Exception ex) {
-            display.setText("Ошибка");
-            tokens.clear();
-            pendingOperation = "";
-            startNewNumber = true;
-            currentInput = "0";
-            return null;
+            while (!ops.isEmpty()) {
+                if ("(".equals(ops.peek()))
+                    return errorAndReset();
+                output.add(ops.pop());
+            }
+
+            Deque<Double> stack = new ArrayDeque<>();
+            for (String tk : output) {
+                if (isOperator(tk)) {
+                    if (stack.size() < 2)
+                        return errorAndReset();
+                    double b = stack.pop();
+                    double a = stack.pop();
+                    Double res = applyOperation(a, b, tk);
+                    if (res == null)
+                        return null;
+                    stack.push(res);
+                } else {
+                    stack.push(Double.parseDouble(tk));
+                }
+            }
+            return stack.size() == 1 ? stack.pop() : errorAndReset();
+        } catch (Exception e) {
+            return errorAndReset();
         }
+    }
+
+    private Double errorAndReset() {
+        display.setText("Ошибка");
+        tokens.clear();
+        pendingOperation = "";
+        startNewNumber = true;
+        currentInput = "0";
+        return null;
+    }
+
+    private int precedence(String op) {
+        return ("+".equals(op) || "-".equals(op)) ? 1 : 2;
     }
 
     private boolean isOperator(String s) {

@@ -49,28 +49,32 @@
                 <GridPane hgap="5" vgap="5" alignment="CENTER">
                     <children>
                         <!-- Row 0 -->
-                        <Button text="7" onAction="#onDigit" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <Button text="8" onAction="#onDigit" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                        <Button text="9" onAction="#onDigit" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                        <Button text="(" onAction="#onParen" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <Button text=")" onAction="#onParen" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <Button text="C" onAction="#onClear" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
                         <Button text="/" onAction="#onOperator" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
                         <!-- Row 1 -->
-                        <Button text="4" onAction="#onDigit" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <Button text="5" onAction="#onDigit" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                        <Button text="6" onAction="#onDigit" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                        <Button text="7" onAction="#onDigit" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <Button text="8" onAction="#onDigit" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Button text="9" onAction="#onDigit" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
                         <Button text="*" onAction="#onOperator" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
 
                         <!-- Row 2 -->
-                        <Button text="1" onAction="#onDigit" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <Button text="2" onAction="#onDigit" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                        <Button text="3" onAction="#onDigit" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                        <Button text="4" onAction="#onDigit" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <Button text="5" onAction="#onDigit" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        <Button text="6" onAction="#onDigit" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
                         <Button text="-" onAction="#onOperator" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
 
                         <!-- Row 3 -->
-                        <Button text="0" onAction="#onDigit" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                        <Button text="C" onAction="#onClear" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-                        <Button text="=" onAction="#onEquals" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                        <Button text="1" onAction="#onDigit" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <Button text="2" onAction="#onDigit" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                        <Button text="3" onAction="#onDigit" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
                         <Button text="+" onAction="#onOperator" GridPane.rowIndex="3" GridPane.columnIndex="3"/>
+
+                        <!-- Row 4 -->
+                        <Button text="0" onAction="#onDigit" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                        <Button text="=" onAction="#onEquals" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
                     </children>
                 </GridPane>
             </children>
