@@ -80,4 +80,26 @@
             </children>
         </VBox>
     </center>
+
+    <right>
+        <VBox spacing="6" alignment="CENTER">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="0"/>
+            </padding>
+            <children>
+                <Button text="sin" onAction="#onFunction"/>
+                <Button text="cos" onAction="#onFunction"/>
+                <Button text="tan" onAction="#onFunction"/>
+                <Button text="cot" onAction="#onFunction"/>
+
+                <Button text="ln" onAction="#onFunction"/>
+                <Button text="log" onAction="#onFunction"/>
+                <Button text="√" onAction="#onFunction"/>
+                <Button text="n!" onAction="#onFunction"/>
+
+                <Button text="abs" onAction="#onFunction"/>
+                <Button text="exp" onAction="#onFunction"/>
+            </children>
+        </VBox>
+    </right>
 </BorderPane>

@@ -139,6 +139,20 @@ public class PrimaryController {
         updateExpression();
     }
 
+    @FXML
+    private void onFunction(ActionEvent event) {
+        String fn = ((Button) event.getSource()).getText();
+        if ("Ошибка".equals(display.getText())) return;
+
+        double val = Double.parseDouble(currentInput);
+        Double res = applyUnary(fn, val);
+        if (res == null) return;
+
+        currentInput = formatResult(res);
+        startNewNumber = false;
+        updateExpression();
+    }
+
     private void updateExpression() {
         if (display == null)
             return;
@@ -263,6 +277,43 @@ public class PrimaryController {
                 return null;
         }
         return result;
+    }
+
+    private Double applyUnary(String fn, double v) {
+        try {
+            switch (fn) {
+                case "sin": return Math.sin(v);
+                case "cos": return Math.cos(v);
+                case "tan": return Math.tan(v);
+                case "cot":
+                    double t = Math.tan(v);
+                    if (t == 0) return errorAndReset();
+                    return 1.0 / t;
+                case "ln":
+                    if (v <= 0) return errorAndReset();
+                    return Math.log(v);
+                case "log":
+                    if (v <= 0) return errorAndReset();
+                    return Math.log10(v);
+                case "√":
+                    if (v < 0) return errorAndReset();
+                    return Math.sqrt(v);
+                case "n!":
+                    if (v < 0 || v != Math.floor(v) || v > 20) return errorAndReset();
+                    return (double) factorial((int) v);
+                case "abs": return Math.abs(v);
+                case "exp": return Math.exp(v);
+                default: return null;
+            }
+        } catch (Exception e) {
+            return errorAndReset();
+        }
+    }
+
+    private long factorial(int n) {
+        long r = 1;
+        for (int i = 2; i <= n; i++) r *= i;
+        return r;
     }
 
     private String formatResult(double value) {
