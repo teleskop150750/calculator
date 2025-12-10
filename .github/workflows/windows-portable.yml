@@ -13,20 +13,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Temurin 17 (with Maven cache)
+      - name: Setup Temurin 21 (with Maven cache)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
           cache: maven
 
       - name: Download JavaFX jmods (Windows)
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $jfxVersion = "17.0.2"
+          $jfxVersion = "21.0.5"
           $zipPath = Join-Path $env:RUNNER_TEMP "javafx-jmods.zip"
-          Invoke-WebRequest -Uri "https://download2.gluonhq.com/openjfx/$jfxVersion/openjfx-$jfxVersion_windows-x64_bin-jmods.zip" -OutFile $zipPath
+          # Use Oracle/Gluon mirror that works from GitHub Actions
+          Invoke-WebRequest -Uri "https://download2.gluonhq.com/openjfx/$jfxVersion/openjfx-${jfxVersion}_windows-x64_bin-jmods.zip" -OutFile $zipPath -UseBasicParsing
+          if (-not (Test-Path $zipPath)) {
+            # Fallback to alternative mirror
+            Invoke-WebRequest -Uri "https://gluonhq.com/download/javafx-${jfxVersion}-jmods-windows" -OutFile $zipPath -UseBasicParsing
+          }
           Expand-Archive -Path $zipPath -DestinationPath (Join-Path $env:RUNNER_TEMP "javafx-jmods") -Force
           $jmods = Join-Path (Join-Path $env:RUNNER_TEMP "javafx-jmods") "javafx-jmods-$jfxVersion"
           "JFX_JMODS=$jmods" >> $env:GITHUB_ENV
