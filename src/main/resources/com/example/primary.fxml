@@ -85,7 +85,7 @@
                         <Button text="√"   userData="sqrt" onAction="#onFunctionToken" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="2">
                             <tooltip><Tooltip text="Квадратный корень"/></tooltip>
                         </Button>
-                        <Button text="x^y" onAction="#onPower"    styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="3">
+                        <Button text="x^y" userData="^" onAction="#onOperator" styleClass="btn-ghost" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="3">
                             <tooltip><Tooltip text="Возведение в степень"/></tooltip>
                         </Button>
 

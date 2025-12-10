@@ -148,51 +148,6 @@ public class PrimaryController {
         updateExpression();
     }
 
-    /**
-     * Добавляет оператор возведения в степень с правоассоциативностью.
-     * <p>
-     * Степень имеет самый высокий приоритет среди операторов и вычисляется
-     * справа налево (правоассоциативна): 2^3^2 = 2^(3^2) = 2^9 = 512.
-     * </p>
-     * 
-     * <h3>Особенности:</h3>
-     * <ul>
-     * <li>Приоритет выше умножения и деления</li>
-     * <li>Может заменить предыдущий оператор (любой, включая другую степень)</li>
-     * <li>Требует два операнда: основание и показатель</li>
-     * </ul>
-     * 
-     * @param event событие кнопки степени
-     */
-    @FXML
-    private void onPower(ActionEvent event) {
-        if (isErrorState())
-            return;
-
-        String op = "^";
-
-        // Завершаем ввод текущего числа, если оно набирается
-        if (!startNewNumber && !currentInput.isEmpty()) {
-            tokens.add(currentInput);
-            startNewNumber = true;
-        }
-
-        if (!tokens.isEmpty()) {
-            // Заменяем любой предыдущий оператор (включая другую степень)
-            if (isOperatorToken(lastToken()) || "^".equals(lastToken())) {
-                tokens.set(tokens.size() - 1, op);
-            } else {
-                tokens.add(op);
-            }
-        } else if (!currentInput.isEmpty()) {
-            tokens.add(currentInput);
-            tokens.add(op);
-            startNewNumber = true;
-        }
-
-        updateExpression();
-    }
-
     /** Добавляет скобки в текущее выражение. */
     @FXML
     private void onParen(ActionEvent event) {
@@ -268,8 +223,15 @@ public class PrimaryController {
             // Удаляем последний токен
             String lastToken = tokens.remove(tokens.size() - 1);
             
-            // Если удалили число, восстанавливаем его для редактирования
-            if (!isOperatorToken(lastToken) && !"(".equals(lastToken) && !")".equals(lastToken)) {
+            // Если удалили число (не оператор, не скобку, не константу, не запятую), восстанавливаем для редактирования
+            boolean isSpecialToken = isOperatorToken(lastToken) 
+                || "(".equals(lastToken) 
+                || ")".equals(lastToken)
+                || ",".equals(lastToken)
+                || "pi".equals(lastToken) 
+                || "e".equals(lastToken);
+                
+            if (!isSpecialToken && lastToken.matches("\\d+(\\.\\d+)?")) {
                 currentInput = lastToken;
                 startNewNumber = false;
             }
@@ -302,7 +264,7 @@ public class PrimaryController {
     /** Подставляет математические константы π или e в ввод. */
     @FXML
     private void onConstant(ActionEvent event) {
-        // Вставляет выбранную константу как текущее число.
+        // Добавляет константу как токен в выражение.
         if (isErrorState()) {
             resetState();
         }
@@ -313,12 +275,16 @@ public class PrimaryController {
             ? button.getUserData().toString() 
             : button.getText();
 
-        if ("pi".equals(constant) || "π".equals(constant)) {
-            currentInput = String.valueOf(Math.PI);
-        } else if ("e".equals(constant)) {
-            currentInput = String.valueOf(Math.E);
+        // Завершаем текущий ввод числа, если нужно
+        if (!startNewNumber && !currentInput.isEmpty()) {
+            tokens.add(currentInput);
+            startNewNumber = true;
         }
-        startNewNumber = false;
+
+        // Добавляем константу как токен
+        tokens.add(constant);
+        startNewNumber = true;
+        
         updateExpression();
     }
 
