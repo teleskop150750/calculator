@@ -1,3 +1,6 @@
+/**
+ * Модуль JavaFX‑калькулятора с точкой входа и контроллерами.
+ */
 module com.example {
     requires javafx.controls;
     requires javafx.fxml;

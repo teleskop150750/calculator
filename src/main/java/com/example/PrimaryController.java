@@ -13,6 +13,14 @@ import javafx.scene.control.Button;
 import javafx.event.ActionEvent;
 import javafx.application.Platform;
 
+/**
+ * Контроллер основного окна калькулятора.
+ * <p>
+ * Обрабатывает ввод пользователя, разбивает выражение на токены, переводит
+ * инфиксную запись в обратную польскую нотацию (ОПН), вычисляет результат и
+ * хранит короткую историю последних вычислений.
+ * </p>
+ */
 public class PrimaryController {
 
     @FXML
@@ -21,20 +29,28 @@ public class PrimaryController {
     @FXML
     private Label historyLabel;
 
+    /** Флаг: следующая цифра начинает новое число. */
     private boolean startNewNumber = true;
+    /** Последние вычисления, показанные в панели истории. */
     private final LinkedList<String> history = new LinkedList<>();
+    /** Текущие токены выражения в инфиксной записи. */
     private final List<String> tokens = new ArrayList<>();
+    /** Число, которое сейчас набирает пользователь. */
     private String currentInput = "0";
     private static final int MAX_HISTORY_SIZE = 3;
+    /** Малый порог для сравнения чисел с плавающей точкой. */
     private static final double EPSILON = 1e-10;
 
     // ========== Навигация ==========
 
+    /** Переходит на второе окно. */
     @FXML
     private void switchToSecondary() throws IOException {
+        // Простой обработчик навигации для кнопок боковой панели.
         App.setRoot("secondary");
     }
 
+    /** Корректно завершает приложение. */
     @FXML
     private void onExit() {
         Platform.exit();
@@ -42,8 +58,10 @@ public class PrimaryController {
 
     // ========== Ввод ==========
 
+    /** Обрабатывает цифровые кнопки и дополняет текущий токен. */
     @FXML
     private void onDigit(ActionEvent event) {
+        // Добавляет цифру к числу или начинает новое.
         if (isErrorState())
             return;
 
@@ -57,6 +75,7 @@ public class PrimaryController {
         updateExpression();
     }
 
+    /** Вставляет десятичный разделитель, если его ещё нет. */
     @FXML
     private void onDecimalPoint() {
         if (isErrorState())
@@ -71,8 +90,10 @@ public class PrimaryController {
         updateExpression();
     }
 
+    /** Добавляет или заменяет арифметический оператор в списке токенов. */
     @FXML
     private void onOperator(ActionEvent event) {
+        // Обрабатывает нажатия +, -, ×, ÷.
         if (isErrorState())
             return;
 
@@ -98,8 +119,10 @@ public class PrimaryController {
         updateExpression();
     }
 
+    /** Добавляет оператор возведения в степень с нужным приоритетом. */
     @FXML
     private void onPower(ActionEvent event) {
+        // Отдельный обработчик для оператора степени.
         if (isErrorState())
             return;
 
@@ -125,8 +148,10 @@ public class PrimaryController {
         updateExpression();
     }
 
+    /** Добавляет скобки в текущее выражение. */
     @FXML
     private void onParen(ActionEvent event) {
+        // Принимает как открывающую, так и закрывающую скобку.
         if (isErrorState())
             return;
 
@@ -148,8 +173,13 @@ public class PrimaryController {
         updateExpression();
     }
 
+    /**
+     * Применяет унарные функции (тригонометрия, логарифм, факториал и т.д.) к
+     * текущему числу.
+     */
     @FXML
     private void onFunction(ActionEvent event) {
+        // Сразу применяет выбранную функцию к текущему числу.
         if (isErrorState())
             return;
 
@@ -169,8 +199,10 @@ public class PrimaryController {
         }
     }
 
+    /** Подставляет математические константы π или e в ввод. */
     @FXML
     private void onConstant(ActionEvent event) {
+        // Вставляет выбранную константу как текущее число.
         if (isErrorState()) {
             resetState();
         }
@@ -186,8 +218,10 @@ public class PrimaryController {
         updateExpression();
     }
 
+    /** Завершает выражение, вычисляет его и сохраняет в истории. */
     @FXML
     private void onEquals() {
+        // Завершает выражение, вычисляет его и обновляет историю.
         if (isErrorState())
             return;
 
@@ -214,6 +248,7 @@ public class PrimaryController {
         updateHistoryLabel();
     }
 
+    /** Сбрасывает калькулятор в исходное состояние. */
     @FXML
     private void onClear() {
         resetState();
@@ -221,6 +256,11 @@ public class PrimaryController {
 
     // ========== Вычисления ==========
 
+    /**
+     * Применяет унарную функцию (sin, log, sqrt и др.) к указанному значению.
+     * Возвращает {@code null}, если функция неизвестна либо входные данные
+     * некорректны.
+     */
     private Double applyUnaryFunction(String fn, double v) {
         try {
             switch (fn) {
@@ -263,6 +303,10 @@ public class PrimaryController {
         }
     }
 
+    /**
+     * Вычисляет факториал для небольших неотрицательных чисел (ограничено для
+     * защиты от переполнения).
+     */
     private long factorial(int n) {
         long result = 1;
         for (int i = 2; i <= n; i++) {
@@ -271,6 +315,10 @@ public class PrimaryController {
         return result;
     }
 
+    /**
+     * Вычисляет инфиксное выражение, представленное списком токенов.
+     * Возвращает {@code null}, если вычисление не удалось.
+     */
     private Double evaluateExpression(List<String> tks) {
         if (tks.isEmpty())
             return null;
@@ -283,6 +331,10 @@ public class PrimaryController {
         }
     }
 
+    /**
+     * Преобразует инфиксные токены в ОПН (алгоритм сортировочной станции),
+     * проверяя корректность скобок.
+     */
     private List<String> convertToRPN(List<String> tokens) {
         List<String> output = new ArrayList<>();
         Deque<String> ops = new ArrayDeque<>();
@@ -321,6 +373,10 @@ public class PrimaryController {
         return output;
     }
 
+    /**
+     * Вычисляет выражение в ОПН.
+     * Возвращает {@code null}, если стек нельзя свести к единственному значению.
+     */
     private Double evaluateRPN(List<String> rpn) {
         if (rpn == null)
             return null;
@@ -345,6 +401,10 @@ public class PrimaryController {
         return stack.size() == 1 ? stack.pop() : resetToError();
     }
 
+    /**
+     * Выполняет бинарную арифметическую операцию.
+     * Деление на ноль возвращает {@code null} и переводит UI в состояние ошибки.
+     */
     private Double applyBinaryOperation(double left, double right, String op) {
         switch (op) {
             case "+":
@@ -368,12 +428,14 @@ public class PrimaryController {
 
     // ========== Утилиты ==========
 
+    /** Проверяет, является ли токен поддерживаемым арифметическим оператором. */
     private boolean isOperatorToken(String s) {
         return "+".equals(s) || "-".equals(s)
                 || "*".equals(s) || "×".equals(s)
                 || "/".equals(s) || "÷".equals(s);
     }
 
+    /** Возвращает приоритет оператора для алгоритма сортировочной станции. */
     private int precedence(String op) {
         if ("^".equals(op))
             return 3;
@@ -382,20 +444,26 @@ public class PrimaryController {
         return 2;
     }
 
+    /**
+     * Нормализует глифы операторов из UI (например, знак минуса) в токены парсера.
+     */
     private String normalizeOperator(String op) {
         if ("−".equals(op))
             return "-";
         return op;
     }
 
+    /** Возвращает последний токен выражения или пустую строку. */
     private String lastToken() {
         return tokens.isEmpty() ? "" : tokens.get(tokens.size() - 1);
     }
 
+    /** Проверяет, находится ли интерфейс в состоянии ошибки. */
     private boolean isErrorState() {
         return "Ошибка".equals(display.getText());
     }
 
+    /** Переводит калькулятор в состояние ошибки и очищает ввод. */
     private Double resetToError() {
         display.setText("Ошибка");
         tokens.clear();
@@ -404,6 +472,7 @@ public class PrimaryController {
         return null;
     }
 
+    /** Очищает выражение, состояние ввода и возвращает дисплей к нулю. */
     private void resetState() {
         display.setText("0");
         tokens.clear();
@@ -411,6 +480,7 @@ public class PrimaryController {
         currentInput = "0";
     }
 
+    /** Формирует строку выражения, отображаемую на основном дисплее. */
     private void updateExpression() {
         if (display == null)
             return;
@@ -431,6 +501,9 @@ public class PrimaryController {
         display.setText(sb.length() == 0 ? currentInput : sb.toString());
     }
 
+    /**
+     * Форматирует результат, убирая лишние нули и мелкие погрешности.
+     */
     private String formatResult(double value) {
         if (Math.abs(value) < EPSILON)
             value = 0;
@@ -442,6 +515,7 @@ public class PrimaryController {
                 .replaceAll("\\.$", "");
     }
 
+    /** Добавляет новое вычисление в ограниченную очередь истории. */
     private void addToHistory(String entry) {
         history.addFirst(entry);
         while (history.size() > MAX_HISTORY_SIZE) {
@@ -449,6 +523,7 @@ public class PrimaryController {
         }
     }
 
+    /** Обновляет отображение истории, выводя старые записи сверху. */
     private void updateHistoryLabel() {
         if (historyLabel == null)
             return;
