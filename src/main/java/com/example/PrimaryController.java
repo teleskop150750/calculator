@@ -96,14 +96,15 @@ public class PrimaryController {
      * 
      * <h3>Логика работы:</h3>
      * <ul>
-     * <li>Если пользователь набирает число, сначала завершаем его ввод 
-     *     и добавляем число в список токенов</li>
-     * <li>Если предыдущий токен уже оператор – заменяем его новым 
-     *     (позволяет исправить случайное нажатие)</li>
+     * <li>Если пользователь набирает число, сначала завершаем его ввод
+     * и добавляем число в список токенов</li>
+     * <li>Если предыдущий токен уже оператор – заменяем его новым
+     * (позволяет исправить случайное нажатие)</li>
      * <li>Иначе добавляем новый оператор после текущего числа</li>
      * </ul>
      * 
      * <h3>Примеры:</h3>
+     * 
      * <pre>
      * "5 +" → пользователь нажал '+' после числа 5
      * "5 + -" → пользователь передумал, нажал '−', результат: "5 -"
@@ -118,10 +119,22 @@ public class PrimaryController {
             return;
 
         Button button = (Button) event.getSource();
-        // Используем userData, если есть, иначе нормализуем текст
-        String op = button.getUserData() != null 
-            ? button.getUserData().toString() 
-            : normalizeOperator(button.getText());
+        String op = button.getUserData().toString();
+
+        // Проверяем, может ли это быть унарный минус
+        boolean canBeUnary = "-".equals(op) && (
+            tokens.isEmpty() || 
+            "(".equals(lastToken()) || 
+            isOperatorToken(lastToken())
+        );
+
+        // Если это унарный минус, добавляем его как префикс к текущему вводу
+        if (canBeUnary && startNewNumber) {
+            currentInput = "-";
+            startNewNumber = false;
+            updateExpression();
+            return;
+        }
 
         // Если пользователь ещё набирает число, завершаем его ввод
         if (!startNewNumber && !currentInput.isEmpty()) {
@@ -184,9 +197,9 @@ public class PrimaryController {
 
         Button button = (Button) event.getSource();
         // Используем userData для получения имени функции
-        String fn = button.getUserData() != null 
-            ? button.getUserData().toString() 
-            : button.getText();
+        String fn = button.getUserData() != null
+                ? button.getUserData().toString()
+                : button.getText();
 
         // Завершаем текущий ввод числа, если нужно
         if (!startNewNumber && !currentInput.isEmpty()) {
@@ -197,7 +210,7 @@ public class PrimaryController {
         // Добавляем функцию и открывающую скобку
         tokens.add(fn);
         tokens.add("(");
-        
+
         updateExpression();
     }
 
@@ -222,21 +235,22 @@ public class PrimaryController {
         } else if (!tokens.isEmpty()) {
             // Удаляем последний токен
             String lastToken = tokens.remove(tokens.size() - 1);
-            
-            // Если удалили число (не оператор, не скобку, не константу, не запятую), восстанавливаем для редактирования
-            boolean isSpecialToken = isOperatorToken(lastToken) 
-                || "(".equals(lastToken) 
-                || ")".equals(lastToken)
-                || ",".equals(lastToken)
-                || "pi".equals(lastToken) 
-                || "e".equals(lastToken);
-                
+
+            // Если удалили число (не оператор, не скобку, не константу, не запятую),
+            // восстанавливаем для редактирования
+            boolean isSpecialToken = isOperatorToken(lastToken)
+                    || "(".equals(lastToken)
+                    || ")".equals(lastToken)
+                    || ",".equals(lastToken)
+                    || "pi".equals(lastToken)
+                    || "e".equals(lastToken);
+
             if (!isSpecialToken && lastToken.matches("\\d+(\\.\\d+)?")) {
                 currentInput = lastToken;
                 startNewNumber = false;
             }
         }
-        
+
         updateExpression();
     }
 
@@ -257,7 +271,7 @@ public class PrimaryController {
 
         // Добавляем запятую как разделитель
         tokens.add(",");
-        
+
         updateExpression();
     }
 
@@ -271,9 +285,9 @@ public class PrimaryController {
 
         Button button = (Button) event.getSource();
         // Используем userData для получения имени константы
-        String constant = button.getUserData() != null 
-            ? button.getUserData().toString() 
-            : button.getText();
+        String constant = button.getUserData() != null
+                ? button.getUserData().toString()
+                : button.getText();
 
         // Завершаем текущий ввод числа, если нужно
         if (!startNewNumber && !currentInput.isEmpty()) {
@@ -284,7 +298,7 @@ public class PrimaryController {
         // Добавляем константу как токен
         tokens.add(constant);
         startNewNumber = true;
-        
+
         updateExpression();
     }
 
@@ -308,7 +322,7 @@ public class PrimaryController {
             String expression = String.join("", tokens);
             ExpressionParser parser = new ExpressionParser(expression);
             double result = parser.evaluate();
-            
+
             display.setText(NumberFormatter.format(result));
             history.addEntry(expression + " = " + display.getText());
 
@@ -334,15 +348,6 @@ public class PrimaryController {
     /** Проверяет, является ли токен поддерживаемым арифметическим оператором. */
     private boolean isOperatorToken(String s) {
         return s.matches("[+\\-*/^]");
-    }
-
-    /**
-     * Нормализует глифы операторов из UI (например, знак минуса) в токены парсера.
-     */
-    private String normalizeOperator(String op) {
-        if ("−".equals(op))
-            return "-";
-        return op;
     }
 
     /** Возвращает последний токен выражения или пустую строку. */
