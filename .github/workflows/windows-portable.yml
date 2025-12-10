@@ -50,10 +50,11 @@ jobs:
             --type app-image `
             --dest $dest `
             --name FXCalc `
+            --app-version "1.0.0" `
             --module-path $modulePath `
             --module com.example/com.example.App `
             --java-options "--enable-native-access=javafx.graphics" `
-            --jlink-options "--strip-debug --no-header-files --no-man-pages --compress=2"
+            --jlink-options "--strip-debug --no-header-files --no-man-pages --compress zip-6"
 
       - name: Zip portable bundle
         shell: pwsh
