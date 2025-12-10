@@ -454,7 +454,9 @@ public class PrimaryController {
             return;
 
         StringBuilder sb = new StringBuilder();
-        for (String line : history) {
+        // выводим историю в обратном порядке: от старой к новой
+        for (int i = history.size() - 1; i >= 0; i--) {
+            String line = history.get(i);
             if (sb.length() > 0) {
                 sb.append('\n');
             }
