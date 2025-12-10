@@ -1,0 +1,37 @@
+name: Windows Portable Build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-windows-portable:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip unzip wget
+
+      - name: Build Windows portable package
+        run: |
+          chmod +x build-windows-portable.sh
+          ./build-windows-portable.sh
+
+      - name: Upload portable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FXCalc-windows-portable
+          path: target/FXCalc-windows-portable.zip
