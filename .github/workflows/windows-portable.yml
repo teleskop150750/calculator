@@ -1,37 +1,65 @@
-name: Windows Portable Build
+name: Build Windows Portable
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
   workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
 
 jobs:
-  build-windows-portable:
-    runs-on: ubuntu-latest
+  windows-portable:
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Setup Temurin 17 (with Maven cache)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 17
           cache: maven
 
-      - name: Install build dependencies
+      - name: Download JavaFX jmods (Windows)
+        shell: pwsh
         run: |
-          sudo apt-get update
-          sudo apt-get install -y zip unzip wget
+          $ErrorActionPreference = "Stop"
+          $jfxVersion = "13"
+          $zipPath = Join-Path $env:RUNNER_TEMP "javafx-jmods.zip"
+          Invoke-WebRequest -Uri "https://download2.gluonhq.com/openjfx/$jfxVersion/openjfx-$jfxVersion_windows-x64_bin-jmods.zip" -OutFile $zipPath
+          Expand-Archive -Path $zipPath -DestinationPath (Join-Path $env:RUNNER_TEMP "javafx-jmods") -Force
+          $jmods = Join-Path (Join-Path $env:RUNNER_TEMP "javafx-jmods") "javafx-jmods-$jfxVersion"
+          "JFX_JMODS=$jmods" >> $env:GITHUB_ENV
 
-      - name: Build Windows portable package
+      - name: Build jar
+        run: mvn -B -DskipTests package
+
+      - name: Create portable app-image (jpackage)
+        shell: pwsh
         run: |
-          chmod +x build-windows-portable.sh
-          ./build-windows-portable.sh
+          $ErrorActionPreference = "Stop"
+          $dest = "target/win-portable"
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          $modulePath = "$env:JFX_JMODS;target/demo-1.0-SNAPSHOT.jar;$env:JAVA_HOME\jmods"
+          jpackage `
+            --type app-image `
+            --dest $dest `
+            --name FXCalc `
+            --module-path $modulePath `
+            --module com.example/com.example.App `
+            --java-options "--enable-native-access=javafx.graphics" `
+            --jlink-options "--strip-debug --no-header-files --no-man-pages --compress=2"
+
+      - name: Zip portable bundle
+        shell: pwsh
+        run: |
+          $src = "target/win-portable/FXCalc"
+          $zip = "target/fxcalc-windows-portable.zip"
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path "$src\*" -DestinationPath $zip
 
       - name: Upload portable artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FXCalc-windows-portable
-          path: target/FXCalc-windows-portable.zip
+          name: fxcalc-windows-portable
+          path: target/fxcalc-windows-portable.zip
