@@ -1,5 +1,9 @@
 package com.example;
 
+import com.example.parser.ExpressionParser;
+import com.example.parser.Token;
+import com.example.util.NumberFormatter;
+
 /**
  * Демонстрация работы нового парсера выражений.
  * <p>

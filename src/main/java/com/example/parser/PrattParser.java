@@ -1,4 +1,6 @@
-package com.example;
+package com.example.parser;
+
+import com.example.evaluator.ExpressionEvaluator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +28,7 @@ import java.util.Map;
 public class PrattParser {
     
     private final Map<String, Integer> precedence;
-    private final Map<String, TokenBasedEvaluator.FunctionDef> functions;
+    private final Map<String, ExpressionEvaluator.FunctionDef> functions;
     private List<Token> tokens;
     private int position;
     
@@ -35,7 +37,7 @@ public class PrattParser {
      * 
      * @param functions карта функций и их определений
      */
-    public PrattParser(Map<String, TokenBasedEvaluator.FunctionDef> functions) {
+    public PrattParser(Map<String, ExpressionEvaluator.FunctionDef> functions) {
         this.functions = functions;
         this.precedence = initPrecedence();
     }
@@ -155,7 +157,7 @@ public class PrattParser {
      */
     private void parseFunction(Token funcToken, List<Token> rpn) {
         String funcName = funcToken.getValue().toLowerCase();
-        TokenBasedEvaluator.FunctionDef func = functions.get(funcName);
+        ExpressionEvaluator.FunctionDef func = functions.get(funcName);
         
         if (func == null) {
             throw new IllegalArgumentException(

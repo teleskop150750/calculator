@@ -1,4 +1,6 @@
-package com.example;
+package com.example.parser;
+
+import com.example.evaluator.ExpressionEvaluator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,7 +29,7 @@ import java.util.Map;
  */
 public class ExpressionParser {
     
-    private final TokenBasedEvaluator evaluator;
+    private final ExpressionEvaluator evaluator;
     private final List<Token> rpn;
     private final Map<String, Double> variables;
     
@@ -40,8 +42,8 @@ public class ExpressionParser {
     public ExpressionParser(String expression) {
         // Инициализируем компоненты
         Map<String, Double> constants = initConstants();
-        Map<String, TokenBasedEvaluator.FunctionDef> functions = initFunctions();
-        Map<String, TokenBasedEvaluator.OperatorDef> operators = initOperators();
+        Map<String, ExpressionEvaluator.FunctionDef> functions = initFunctions();
+        Map<String, ExpressionEvaluator.OperatorDef> operators = initOperators();
         
         // Создаём токенизатор
         List<String> functionNames = Arrays.asList(
@@ -55,7 +57,7 @@ public class ExpressionParser {
         PrattParser parser = new PrattParser(functions);
         
         // Создаём вычислитель
-        this.evaluator = new TokenBasedEvaluator(constants, functions, operators);
+        this.evaluator = new ExpressionEvaluator(constants, functions, operators);
         
         // Парсим выражение
         List<Token> tokens = tokenizer.tokenize(expression);
@@ -95,14 +97,14 @@ public class ExpressionParser {
     /**
      * Инициализирует функции по умолчанию.
      */
-    private static Map<String, TokenBasedEvaluator.FunctionDef> initFunctions() {
-        Map<String, TokenBasedEvaluator.FunctionDef> functions = new HashMap<>();
+    private static Map<String, ExpressionEvaluator.FunctionDef> initFunctions() {
+        Map<String, ExpressionEvaluator.FunctionDef> functions = new HashMap<>();
         
         // Тригонометрические функции (в радианах для внутренних вычислений)
-        functions.put("sin", new TokenBasedEvaluator.FunctionDef(1, args -> Math.sin(args[0])));
-        functions.put("cos", new TokenBasedEvaluator.FunctionDef(1, args -> Math.cos(args[0])));
-        functions.put("tan", new TokenBasedEvaluator.FunctionDef(1, args -> Math.tan(args[0])));
-        functions.put("cot", new TokenBasedEvaluator.FunctionDef(1, args -> {
+        functions.put("sin", new ExpressionEvaluator.FunctionDef(1, args -> Math.sin(args[0])));
+        functions.put("cos", new ExpressionEvaluator.FunctionDef(1, args -> Math.cos(args[0])));
+        functions.put("tan", new ExpressionEvaluator.FunctionDef(1, args -> Math.tan(args[0])));
+        functions.put("cot", new ExpressionEvaluator.FunctionDef(1, args -> {
             double tan = Math.tan(args[0]);
             if (Math.abs(tan) < 1e-10) {
                 throw new ArithmeticException("Деление на ноль при вычислении котангенса");
@@ -111,13 +113,13 @@ public class ExpressionParser {
         }));
         
         // Логарифмы
-        functions.put("ln", new TokenBasedEvaluator.FunctionDef(1, args -> {
+        functions.put("ln", new ExpressionEvaluator.FunctionDef(1, args -> {
             if (args[0] <= 0) {
                 throw new IllegalArgumentException("Логарифм определён только для положительных чисел");
             }
             return Math.log(args[0]);
         }));
-        functions.put("log", new TokenBasedEvaluator.FunctionDef(1, args -> {
+        functions.put("log", new ExpressionEvaluator.FunctionDef(1, args -> {
             if (args[0] <= 0) {
                 throw new IllegalArgumentException("Логарифм определён только для положительных чисел");
             }
@@ -125,24 +127,24 @@ public class ExpressionParser {
         }));
         
         // Алгебраические функции
-        functions.put("sqrt", new TokenBasedEvaluator.FunctionDef(1, args -> {
+        functions.put("sqrt", new ExpressionEvaluator.FunctionDef(1, args -> {
             if (args[0] < 0) {
                 throw new IllegalArgumentException("Корень из отрицательного числа не определён");
             }
             return Math.sqrt(args[0]);
         }));
-        functions.put("√", new TokenBasedEvaluator.FunctionDef(1, args -> {
+        functions.put("√", new ExpressionEvaluator.FunctionDef(1, args -> {
             if (args[0] < 0) {
                 throw new IllegalArgumentException("Корень из отрицательного числа не определён");
             }
             return Math.sqrt(args[0]);
         }));
-        functions.put("abs", new TokenBasedEvaluator.FunctionDef(1, args -> Math.abs(args[0])));
-        functions.put("exp", new TokenBasedEvaluator.FunctionDef(1, args -> Math.exp(args[0])));
+        functions.put("abs", new ExpressionEvaluator.FunctionDef(1, args -> Math.abs(args[0])));
+        functions.put("exp", new ExpressionEvaluator.FunctionDef(1, args -> Math.exp(args[0])));
         
         // Многоаргументные функции
-        functions.put("max", new TokenBasedEvaluator.FunctionDef(2, args -> Math.max(args[0], args[1])));
-        functions.put("min", new TokenBasedEvaluator.FunctionDef(2, args -> Math.min(args[0], args[1])));
+        functions.put("max", new ExpressionEvaluator.FunctionDef(2, args -> Math.max(args[0], args[1])));
+        functions.put("min", new ExpressionEvaluator.FunctionDef(2, args -> Math.min(args[0], args[1])));
         
         return functions;
     }
@@ -161,22 +163,22 @@ public class ExpressionParser {
     /**
      * Инициализирует операторы по умолчанию.
      */
-    private static Map<String, TokenBasedEvaluator.OperatorDef> initOperators() {
-        Map<String, TokenBasedEvaluator.OperatorDef> operators = new HashMap<>();
+    private static Map<String, ExpressionEvaluator.OperatorDef> initOperators() {
+        Map<String, ExpressionEvaluator.OperatorDef> operators = new HashMap<>();
         
-        operators.put("+", new TokenBasedEvaluator.OperatorDef(2, args -> args[0] + args[1]));
-        operators.put("-", new TokenBasedEvaluator.OperatorDef(2, args -> args[0] - args[1]));
-        operators.put("*", new TokenBasedEvaluator.OperatorDef(2, args -> args[0] * args[1]));
-        operators.put("/", new TokenBasedEvaluator.OperatorDef(2, args -> {
+        operators.put("+", new ExpressionEvaluator.OperatorDef(2, args -> args[0] + args[1]));
+        operators.put("-", new ExpressionEvaluator.OperatorDef(2, args -> args[0] - args[1]));
+        operators.put("*", new ExpressionEvaluator.OperatorDef(2, args -> args[0] * args[1]));
+        operators.put("/", new ExpressionEvaluator.OperatorDef(2, args -> {
             if (Math.abs(args[1]) < 1e-10) {
                 throw new ArithmeticException("Деление на ноль");
             }
             return args[0] / args[1];
         }));
-        operators.put("^", new TokenBasedEvaluator.OperatorDef(2, args -> Math.pow(args[0], args[1])));
+        operators.put("^", new ExpressionEvaluator.OperatorDef(2, args -> Math.pow(args[0], args[1])));
         
         // Унарный минус
-        operators.put("~", new TokenBasedEvaluator.OperatorDef(1, args -> -args[0]));
+        operators.put("~", new ExpressionEvaluator.OperatorDef(1, args -> -args[0]));
         
         return operators;
     }

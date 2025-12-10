@@ -1,4 +1,4 @@
-package com.example;
+package com.example.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,10 +57,10 @@ public class ExpressionTokenizer {
             tokens.add(token);
         }
         
-        // Проверка на неизвестные токены
+        // Проверка на неизвестные токены (игнорируем пробелы)
         List<Token> unknownTokens = new ArrayList<>();
         for (Token token : tokens) {
-            if (token.getType() == TokenType.UNKNOWN) {
+            if (token.getType() == TokenType.UNKNOWN && !token.getValue().matches("\\s+")) {
                 unknownTokens.add(token);
             }
         }

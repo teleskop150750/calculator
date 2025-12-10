@@ -1,5 +1,9 @@
 package com.example;
 
+import com.example.parser.ExpressionParser;
+import com.example.util.History;
+import com.example.util.NumberFormatter;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,8 +117,11 @@ public class PrimaryController {
         if (isErrorState())
             return;
 
-        // Нормализуем символ оператора (например, '−' → '-')
-        String op = normalizeOperator(((Button) event.getSource()).getText());
+        Button button = (Button) event.getSource();
+        // Используем userData, если есть, иначе нормализуем текст
+        String op = button.getUserData() != null 
+            ? button.getUserData().toString() 
+            : normalizeOperator(button.getText());
 
         // Если пользователь ещё набирает число, завершаем его ввод
         if (!startNewNumber && !currentInput.isEmpty()) {
@@ -212,27 +219,84 @@ public class PrimaryController {
     }
 
     /**
-     * Применяет унарные функции (тригонометрия, логарифм, факториал и т.д.) к
-     * текущему числу.
+     * Добавляет функцию как токен в выражение (sin, cos, tan и т.д.).
+     * Функция добавляется с открывающей скобкой для ввода аргумента.
      */
     @FXML
-    private void onFunction(ActionEvent event) {
-        // Сразу применяет выбранную функцию к текущему числу.
+    private void onFunctionToken(ActionEvent event) {
         if (isErrorState())
             return;
 
-        String fn = ((Button) event.getSource()).getText();
+        Button button = (Button) event.getSource();
+        // Используем userData для получения имени функции
+        String fn = button.getUserData() != null 
+            ? button.getUserData().toString() 
+            : button.getText();
 
-        try {
-            double val = Double.parseDouble(currentInput);
-            double res = MathOperations.applyUnaryFunction(fn, val);
-
-            currentInput = NumberFormatter.format(res);
-            startNewNumber = false;
-            updateExpression();
-        } catch (Exception e) {
-            resetToError();
+        // Завершаем текущий ввод числа, если нужно
+        if (!startNewNumber && !currentInput.isEmpty()) {
+            tokens.add(currentInput);
+            startNewNumber = true;
         }
+
+        // Добавляем функцию и открывающую скобку
+        tokens.add(fn);
+        tokens.add("(");
+        
+        updateExpression();
+    }
+
+    /**
+     * Удаляет последний символ из текущего ввода или последний токен.
+     * Работает как клавиша Backspace.
+     */
+    @FXML
+    private void onBackspace() {
+        if (isErrorState()) {
+            resetState();
+            return;
+        }
+
+        if (!startNewNumber && currentInput.length() > 0) {
+            // Удаляем символ из текущего числа
+            currentInput = currentInput.substring(0, currentInput.length() - 1);
+            if (currentInput.isEmpty()) {
+                currentInput = "0";
+                startNewNumber = true;
+            }
+        } else if (!tokens.isEmpty()) {
+            // Удаляем последний токен
+            String lastToken = tokens.remove(tokens.size() - 1);
+            
+            // Если удалили число, восстанавливаем его для редактирования
+            if (!isOperatorToken(lastToken) && !"(".equals(lastToken) && !")".equals(lastToken)) {
+                currentInput = lastToken;
+                startNewNumber = false;
+            }
+        }
+        
+        updateExpression();
+    }
+
+    /**
+     * Добавляет запятую как разделитель аргументов функции.
+     * Используется для функций с несколькими аргументами (например, max).
+     */
+    @FXML
+    private void onComma() {
+        if (isErrorState())
+            return;
+
+        // Завершаем текущий ввод числа
+        if (!startNewNumber && !currentInput.isEmpty()) {
+            tokens.add(currentInput);
+            startNewNumber = true;
+        }
+
+        // Добавляем запятую как разделитель
+        tokens.add(",");
+        
+        updateExpression();
     }
 
     /** Подставляет математические константы π или e в ввод. */
@@ -243,9 +307,13 @@ public class PrimaryController {
             resetState();
         }
 
-        String constant = ((Button) event.getSource()).getText();
+        Button button = (Button) event.getSource();
+        // Используем userData для получения имени константы
+        String constant = button.getUserData() != null 
+            ? button.getUserData().toString() 
+            : button.getText();
 
-        if ("π".equals(constant)) {
+        if ("pi".equals(constant) || "π".equals(constant)) {
             currentInput = String.valueOf(Math.PI);
         } else if ("e".equals(constant)) {
             currentInput = String.valueOf(Math.E);
@@ -271,10 +339,12 @@ public class PrimaryController {
         }
 
         try {
-            double result = ExpressionEvaluator.evaluate(tokens);
-            String exprText = String.join(" ", tokens);
+            String expression = String.join("", tokens);
+            ExpressionParser parser = new ExpressionParser(expression);
+            double result = parser.evaluate();
+            
             display.setText(NumberFormatter.format(result));
-            history.addEntry(exprText + " = " + display.getText());
+            history.addEntry(expression + " = " + display.getText());
 
             currentInput = display.getText();
             tokens.clear();
@@ -297,7 +367,7 @@ public class PrimaryController {
 
     /** Проверяет, является ли токен поддерживаемым арифметическим оператором. */
     private boolean isOperatorToken(String s) {
-        return ExpressionEvaluator.isOperator(s);
+        return s.matches("[+\\-*/^]");
     }
 
     /**

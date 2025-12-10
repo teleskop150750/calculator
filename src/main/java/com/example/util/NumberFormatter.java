@@ -1,4 +1,4 @@
-package com.example;
+package com.example.util;
 
 /**
  * Класс для форматирования чисел для отображения.
