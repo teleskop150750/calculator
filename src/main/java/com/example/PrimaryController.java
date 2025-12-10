@@ -25,25 +25,30 @@ public class PrimaryController {
     private final LinkedList<String> history = new LinkedList<>();
     private final List<String> tokens = new ArrayList<>();
     private String currentInput = "0";
-    private String pendingOperation = "";
+    private static final int MAX_HISTORY_SIZE = 3;
+    private static final double EPSILON = 1e-10;
 
-    // обработчик меню "О программе" (переход на экран secondary.fxml)
+    // ========== Навигация ==========
+
     @FXML
     private void switchToSecondary() throws IOException {
         App.setRoot("secondary");
     }
 
-    // обработчик меню "Выход"
     @FXML
     private void onExit() {
         Platform.exit();
     }
 
-    // обработчик нажатия цифр
+    // ========== Ввод ==========
+
     @FXML
     private void onDigit(ActionEvent event) {
+        if (isErrorState())
+            return;
+
         String value = ((Button) event.getSource()).getText();
-        if (startNewNumber || "Ошибка".equals(display.getText())) {
+        if (startNewNumber) {
             currentInput = value;
             startNewNumber = false;
         } else {
@@ -54,7 +59,9 @@ public class PrimaryController {
 
     @FXML
     private void onDecimalPoint() {
-        if ("Ошибка".equals(display.getText())) return;
+        if (isErrorState())
+            return;
+
         if (startNewNumber) {
             currentInput = "0.";
             startNewNumber = false;
@@ -64,14 +71,12 @@ public class PrimaryController {
         updateExpression();
     }
 
-    // обработчик нажатия операций (+, -, *, /)
     @FXML
     private void onOperator(ActionEvent event) {
-        String op = ((Button) event.getSource()).getText();
-        if ("Ошибка".equals(display.getText())) return;
+        if (isErrorState())
+            return;
 
-        // нормализация минуса
-        if ("−".equals(op)) op = "-";
+        String op = normalizeOperator(((Button) event.getSource()).getText());
 
         if (!startNewNumber && !currentInput.isEmpty()) {
             tokens.add(currentInput);
@@ -79,7 +84,7 @@ public class PrimaryController {
         }
 
         if (!tokens.isEmpty()) {
-            if (isOperator(lastToken())) {
+            if (isOperatorToken(lastToken())) {
                 tokens.set(tokens.size() - 1, op);
             } else {
                 tokens.add(op);
@@ -90,54 +95,44 @@ public class PrimaryController {
             startNewNumber = true;
         }
 
-        pendingOperation = op;
         updateExpression();
     }
 
-    // обработчик "="
     @FXML
-    private void onEquals() {
-        if ("Ошибка".equals(display.getText()))
+    private void onPower(ActionEvent event) {
+        if (isErrorState())
             return;
-        if (!startNewNumber)
+
+        String op = "^";
+
+        if (!startNewNumber && !currentInput.isEmpty()) {
             tokens.add(currentInput);
-        if (tokens.isEmpty())
-            return;
-        if (isOperator(lastToken()))
-            tokens.remove(tokens.size() - 1);
+            startNewNumber = true;
+        }
 
-        Double result = evaluateTokens(tokens);
-        if (result == null)
-            return;
+        if (!tokens.isEmpty()) {
+            if (isOperatorToken(lastToken()) || "^".equals(lastToken())) {
+                tokens.set(tokens.size() - 1, op);
+            } else {
+                tokens.add(op);
+            }
+        } else if (!currentInput.isEmpty()) {
+            tokens.add(currentInput);
+            tokens.add(op);
+            startNewNumber = true;
+        }
 
-        String exprText = String.join(" ", tokens);
-        display.setText(formatResult(result));
-        addToHistory(exprText + " = " + display.getText());
-
-        currentInput = display.getText();
-        tokens.clear();
-        pendingOperation = "";
-        startNewNumber = true;
-        updateHistoryLabel();
-    }
-
-    // обработчик "C" (сброс)
-    @FXML
-    private void onClear() {
-        display.setText("0");
-        tokens.clear();
-        pendingOperation = "";
-        startNewNumber = true;
-        currentInput = "0";
+        updateExpression();
     }
 
     @FXML
     private void onParen(ActionEvent event) {
-        String p = ((Button) event.getSource()).getText();
-        if ("Ошибка".equals(display.getText()))
+        if (isErrorState())
             return;
 
-        if ("(".equals(p)) {
+        String paren = ((Button) event.getSource()).getText();
+
+        if ("(".equals(paren)) {
             if (!startNewNumber) {
                 tokens.add(currentInput);
                 startNewNumber = true;
@@ -155,32 +150,32 @@ public class PrimaryController {
 
     @FXML
     private void onFunction(ActionEvent event) {
+        if (isErrorState())
+            return;
+
         String fn = ((Button) event.getSource()).getText();
-        if ("Ошибка".equals(display.getText())) return;
 
         try {
             double val = Double.parseDouble(currentInput);
-            Double res = applyUnary(fn, val);
-            if (res == null) return;
+            Double res = applyUnaryFunction(fn, val);
+            if (res == null)
+                return;
 
             currentInput = formatResult(res);
             startNewNumber = false;
             updateExpression();
         } catch (NumberFormatException e) {
-            errorAndReset();
+            resetToError();
         }
     }
 
     @FXML
     private void onConstant(ActionEvent event) {
-        String constant = ((Button) event.getSource()).getText();
-        if ("Ошибка".equals(display.getText())) {
-            display.setText("0");
-            tokens.clear();
-            pendingOperation = "";
-            startNewNumber = true;
-            currentInput = "0";
+        if (isErrorState()) {
+            resetState();
         }
+
+        String constant = ((Button) event.getSource()).getText();
 
         if ("π".equals(constant)) {
             currentInput = String.valueOf(Math.PI);
@@ -192,38 +187,236 @@ public class PrimaryController {
     }
 
     @FXML
-    private void onPower(ActionEvent event) {
-        String op = "^";
-        if ("Ошибка".equals(display.getText())) return;
+    private void onEquals() {
+        if (isErrorState())
+            return;
 
-        if (!startNewNumber && !currentInput.isEmpty()) {
+        if (!startNewNumber) {
             tokens.add(currentInput);
-            startNewNumber = true;
+        }
+        if (tokens.isEmpty())
+            return;
+        if (isOperatorToken(lastToken())) {
+            tokens.remove(tokens.size() - 1);
         }
 
-        if (!tokens.isEmpty()) {
-            if (isOperator(lastToken()) || "^".equals(lastToken())) {
-                tokens.set(tokens.size() - 1, op);
-            } else {
-                tokens.add(op);
+        Double result = evaluateExpression(tokens);
+        if (result == null)
+            return;
+
+        String exprText = String.join(" ", tokens);
+        display.setText(formatResult(result));
+        addToHistory(exprText + " = " + display.getText());
+
+        currentInput = display.getText();
+        tokens.clear();
+        startNewNumber = true;
+        updateHistoryLabel();
+    }
+
+    @FXML
+    private void onClear() {
+        resetState();
+    }
+
+    // ========== Вычисления ==========
+
+    private Double applyUnaryFunction(String fn, double v) {
+        try {
+            switch (fn) {
+                case "sin":
+                    return Math.sin(Math.toRadians(v));
+                case "cos":
+                    return Math.cos(Math.toRadians(v));
+                case "tan":
+                    return Math.tan(Math.toRadians(v));
+                case "cot":
+                    double tanVal = Math.tan(Math.toRadians(v));
+                    if (Math.abs(tanVal) < EPSILON)
+                        return resetToError();
+                    return 1.0 / tanVal;
+                case "ln":
+                    if (v <= 0)
+                        return resetToError();
+                    return Math.log(v);
+                case "log":
+                    if (v <= 0)
+                        return resetToError();
+                    return Math.log10(v);
+                case "√":
+                    if (v < 0)
+                        return resetToError();
+                    return Math.sqrt(v);
+                case "n!":
+                    if (v < 0 || v != Math.floor(v) || v > 20)
+                        return resetToError();
+                    return (double) factorial((int) v);
+                case "abs":
+                    return Math.abs(v);
+                case "exp":
+                    return Math.exp(v);
+                default:
+                    return null;
             }
-        } else if (!currentInput.isEmpty()) {
-            tokens.add(currentInput);
-            tokens.add(op);
-            startNewNumber = true;
+        } catch (Exception e) {
+            return resetToError();
+        }
+    }
+
+    private long factorial(int n) {
+        long result = 1;
+        for (int i = 2; i <= n; i++) {
+            result *= i;
+        }
+        return result;
+    }
+
+    private Double evaluateExpression(List<String> tks) {
+        if (tks.isEmpty())
+            return null;
+
+        try {
+            List<String> rpn = convertToRPN(tks);
+            return evaluateRPN(rpn);
+        } catch (Exception e) {
+            return resetToError();
+        }
+    }
+
+    private List<String> convertToRPN(List<String> tokens) {
+        List<String> output = new ArrayList<>();
+        Deque<String> ops = new ArrayDeque<>();
+
+        for (String token : tokens) {
+            if (isOperatorToken(token) || "^".equals(token)) {
+                while (!ops.isEmpty() && (isOperatorToken(ops.peek()) || "^".equals(ops.peek())) &&
+                        precedence(ops.peek()) >= precedence(token)) {
+                    output.add(ops.pop());
+                }
+                ops.push(token);
+            } else if ("(".equals(token)) {
+                ops.push(token);
+            } else if (")".equals(token)) {
+                while (!ops.isEmpty() && !"(".equals(ops.peek())) {
+                    output.add(ops.pop());
+                }
+                if (ops.isEmpty() || !"(".equals(ops.peek())) {
+                    resetToError();
+                    return null;
+                }
+                ops.pop();
+            } else {
+                output.add(token);
+            }
         }
 
-        pendingOperation = op;
-        updateExpression();
+        while (!ops.isEmpty()) {
+            if ("(".equals(ops.peek())) {
+                resetToError();
+                return null;
+            }
+            output.add(ops.pop());
+        }
+
+        return output;
+    }
+
+    private Double evaluateRPN(List<String> rpn) {
+        if (rpn == null)
+            return null;
+
+        Deque<Double> stack = new ArrayDeque<>();
+
+        for (String token : rpn) {
+            if (isOperatorToken(token) || "^".equals(token)) {
+                if (stack.size() < 2)
+                    return resetToError();
+                double b = stack.pop();
+                double a = stack.pop();
+                Double res = applyBinaryOperation(a, b, token);
+                if (res == null)
+                    return null;
+                stack.push(res);
+            } else {
+                stack.push(Double.parseDouble(token));
+            }
+        }
+
+        return stack.size() == 1 ? stack.pop() : resetToError();
+    }
+
+    private Double applyBinaryOperation(double left, double right, String op) {
+        switch (op) {
+            case "+":
+                return left + right;
+            case "-":
+                return left - right;
+            case "*":
+            case "×":
+                return left * right;
+            case "/":
+            case "÷":
+                if (Math.abs(right) < EPSILON)
+                    return resetToError();
+                return left / right;
+            case "^":
+                return Math.pow(left, right);
+            default:
+                return null;
+        }
+    }
+
+    // ========== Утилиты ==========
+
+    private boolean isOperatorToken(String s) {
+        return "+".equals(s) || "-".equals(s)
+                || "*".equals(s) || "×".equals(s)
+                || "/".equals(s) || "÷".equals(s);
+    }
+
+    private int precedence(String op) {
+        if ("^".equals(op))
+            return 3;
+        if ("+".equals(op) || "-".equals(op))
+            return 1;
+        return 2;
+    }
+
+    private String normalizeOperator(String op) {
+        if ("−".equals(op))
+            return "-";
+        return op;
+    }
+
+    private String lastToken() {
+        return tokens.isEmpty() ? "" : tokens.get(tokens.size() - 1);
+    }
+
+    private boolean isErrorState() {
+        return "Ошибка".equals(display.getText());
+    }
+
+    private Double resetToError() {
+        display.setText("Ошибка");
+        tokens.clear();
+        startNewNumber = true;
+        currentInput = "0";
+        return null;
+    }
+
+    private void resetState() {
+        display.setText("0");
+        tokens.clear();
+        startNewNumber = true;
+        currentInput = "0";
     }
 
     private void updateExpression() {
         if (display == null)
             return;
-        if ("Ошибка".equals(display.getText())) {
-            display.setText("Ошибка");
+        if (isErrorState())
             return;
-        }
+
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < tokens.size(); i++) {
             if (i > 0)
@@ -238,171 +431,28 @@ public class PrimaryController {
         display.setText(sb.length() == 0 ? currentInput : sb.toString());
     }
 
-    private Double evaluateTokens(List<String> tks) {
-        if (tks.isEmpty()) return null;
-        try {
-            List<String> output = new ArrayList<>();
-            Deque<String> ops = new ArrayDeque<>();
-            for (String tk : tks) {
-                if (isOperator(tk) || "^".equals(tk)) {
-                    while (!ops.isEmpty() && (isOperator(ops.peek()) || "^".equals(ops.peek())) &&
-                           precedence(ops.peek()) >= precedence(tk)) {
-                        output.add(ops.pop());
-                    }
-                    ops.push(tk);
-                } else if ("(".equals(tk)) {
-                    ops.push(tk);
-                } else if (")".equals(tk)) {
-                    while (!ops.isEmpty() && !"(".equals(ops.peek())) {
-                        output.add(ops.pop());
-                    }
-                    if (ops.isEmpty() || !"(".equals(ops.peek())) return errorAndReset();
-                    ops.pop();
-                } else {
-                    output.add(tk);
-                }
-            }
-            while (!ops.isEmpty()) {
-                if ("(".equals(ops.peek())) return errorAndReset();
-                output.add(ops.pop());
-            }
-
-            Deque<Double> stack = new ArrayDeque<>();
-            for (String tk : output) {
-                if (isOperator(tk) || "^".equals(tk)) {
-                    if (stack.size() < 2) return errorAndReset();
-                    double b = stack.pop();
-                    double a = stack.pop();
-                    Double res = applyOperation(a, b, tk);
-                    if (res == null) return null;
-                    stack.push(res);
-                } else {
-                    stack.push(Double.parseDouble(tk));
-                }
-            }
-            return stack.size() == 1 ? stack.pop() : errorAndReset();
-        } catch (Exception e) {
-            return errorAndReset();
-        }
-    }
-
-    private Double errorAndReset() {
-        display.setText("Ошибка");
-        tokens.clear();
-        pendingOperation = "";
-        startNewNumber = true;
-        currentInput = "0";
-        return null;
-    }
-
-    private int precedence(String op) {
-        if ("^".equals(op)) return 3;
-        if ("+".equals(op) || "-".equals(op)) {
-            return 1;
-        }
-        return 2;
-    }
-
-    private boolean isOperator(String s) {
-        return "+".equals(s) || "-".equals(s) 
-            || "*".equals(s) || "×".equals(s) || "/".equals(s) || "÷".equals(s);
-    }
-
-    private String lastToken() {
-        return tokens.isEmpty() ? "" : tokens.get(tokens.size() - 1);
-    }
-
-    private Double applyOperation(double left, double right, String op) {
-        double result;
-        switch (op) {
-            case "+":
-                result = left + right;
-                break;
-            case "-":
-                result = left - right;
-                break;
-            case "*":
-            case "×":
-                result = left * right;
-                break;
-            case "/":
-            case "÷":
-                if (right == 0) {
-                    display.setText("Ошибка");
-                    tokens.clear();
-                    pendingOperation = "";
-                    startNewNumber = true;
-                    currentInput = "0";
-                    return null;
-                }
-                result = left / right;
-                break;
-            case "^":
-                result = Math.pow(left, right);
-                break;
-            default:
-                return null;
-        }
-        return result;
-    }
-
-    private Double applyUnary(String fn, double v) {
-        try {
-            switch (fn) {
-                case "sin": return Math.sin(Math.toRadians(v));
-                case "cos": return Math.cos(Math.toRadians(v));
-                case "tan": return Math.tan(Math.toRadians(v));
-                case "cot":
-                    double rad = Math.toRadians(v);
-                    double tanVal = Math.tan(rad);
-                    if (Math.abs(tanVal) < 1e-10) return errorAndReset();
-                    return 1.0 / tanVal;
-                case "ln":
-                    if (v <= 0) return errorAndReset();
-                    return Math.log(v);
-                case "log":
-                    if (v <= 0) return errorAndReset();
-                    return Math.log10(v);
-                case "√":
-                    if (v < 0) return errorAndReset();
-                    return Math.sqrt(v);
-                case "n!":
-                    if (v < 0 || v != Math.floor(v) || v > 20) return errorAndReset();
-                    return (double) factorial((int) v);
-                case "abs": return Math.abs(v);
-                case "exp": return Math.exp(v);
-                default: return null;
-            }
-        } catch (Exception e) {
-            return errorAndReset();
-        }
-    }
-
-    private long factorial(int n) {
-        long r = 1;
-        for (int i = 2; i <= n; i++) r *= i;
-        return r;
-    }
-
     private String formatResult(double value) {
-        if (Math.abs(value) < 1e-10) value = 0;
+        if (Math.abs(value) < EPSILON)
+            value = 0;
         if (value == (long) value) {
             return String.format("%d", (long) value);
         }
-        return String.format("%.8f", value).replaceAll("0+$", "").replaceAll("\\.$", "");
+        return String.format("%.8f", value)
+                .replaceAll("0+$", "")
+                .replaceAll("\\.$", "");
     }
 
     private void addToHistory(String entry) {
         history.addFirst(entry);
-        while (history.size() > 3) {
+        while (history.size() > MAX_HISTORY_SIZE) {
             history.removeLast();
         }
     }
 
     private void updateHistoryLabel() {
-        if (historyLabel == null) {
+        if (historyLabel == null)
             return;
-        }
+
         StringBuilder sb = new StringBuilder();
         for (String line : history) {
             if (sb.length() > 0) {
