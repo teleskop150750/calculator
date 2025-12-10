@@ -24,7 +24,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $jfxVersion = "13"
+          $jfxVersion = "17.0.2"
           $zipPath = Join-Path $env:RUNNER_TEMP "javafx-jmods.zip"
           Invoke-WebRequest -Uri "https://download2.gluonhq.com/openjfx/$jfxVersion/openjfx-$jfxVersion_windows-x64_bin-jmods.zip" -OutFile $zipPath
           Expand-Archive -Path $zipPath -DestinationPath (Join-Path $env:RUNNER_TEMP "javafx-jmods") -Force
