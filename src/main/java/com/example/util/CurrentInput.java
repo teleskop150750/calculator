@@ -1,8 +1,5 @@
 package com.example.util;
 
-import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
-
 /**
  * Класс для управления текущим вводом числа пользователем.
  * <p>
@@ -15,13 +12,10 @@ public class CurrentInput {
     /** Текущая строка ввода. */
     private String value = "";
 
-    private TokenManager tokenManager;
-
     /**
      * Создаёт новый пустой ввод.
      */
-    public CurrentInput(TokenManager tokenManager) {
-        this.tokenManager = tokenManager;
+    public CurrentInput() {
     }
 
     public String getValue() {
@@ -38,24 +32,18 @@ public class CurrentInput {
     }
 
     public void onDigit(String value) {
-        if (this.tokenManager.isStartNewNumber()) {
+        if (isEmpty()) {
             this.value = value;
-            this.tokenManager.setStartNewNumber(false);
         } else {
             this.value += value;
         }
     }
 
     public void onDecimalPoint() {
-        if (this.tokenManager.isStartNewNumber()) {
+        if (this.isEmpty()) {
             this.value = "0.";
-            this.tokenManager.setStartNewNumber(false);
-        } else {
-            if (this.value.isEmpty()) {
-                this.value = "0.";
-            } else if (!this.value.contains(".")) {
-                this.value += ".";
-            }
+        } else if (!this.value.contains(".")) {
+            this.value += ".";
         }
     }
 

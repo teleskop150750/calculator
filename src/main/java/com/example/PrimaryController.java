@@ -32,7 +32,7 @@ public class PrimaryController {
 
     private final History history = new History();
     private final TokenManager tokenManager = new TokenManager();
-    private final CurrentInput currentInput = new CurrentInput(tokenManager);
+    private final CurrentInput currentInput = new CurrentInput();
 
     // ========== Навигация ==========
 
@@ -117,7 +117,7 @@ public class PrimaryController {
         // return;
         // }
 
-        finalizeCurrentNumber();
+        finalizeCurrentInput();
 
         // Если выражение пустое и ввод пустой, игнорируем оператор (кроме минуса)
         if (tokenManager.isEmpty() && currentInput.isEmpty()) {
@@ -129,7 +129,6 @@ public class PrimaryController {
         } else if (!currentInput.isEmpty()) {
             tokenManager.add(currentInput.getValue());
             tokenManager.add(operator);
-            tokenManager.setStartNewNumber(true);
         }
 
         updateExpression();
@@ -151,7 +150,7 @@ public class PrimaryController {
 
         String paren = ((Button) event.getSource()).getText();
 
-        finalizeCurrentNumber();
+        finalizeCurrentInput();
 
         // Предотвращаем двойные открывающие скобки после функций
         if ("(".equals(paren) && "(".equals(tokenManager.getLast())) {
@@ -179,7 +178,7 @@ public class PrimaryController {
         Button button = (Button) event.getSource();
         String function = button.getUserData().toString();
 
-        finalizeCurrentNumber();
+        finalizeCurrentInput();
 
         tokenManager.add(function);
         tokenManager.add("(");
@@ -202,11 +201,11 @@ public class PrimaryController {
             return;
         }
 
-        if (!tokenManager.isStartNewNumber() && !currentInput.isEmpty()) {
+        if (!currentInput.isEmpty()) {
             currentInput.backspace();
-            if ("0".equals(currentInput.getValue())) {
-                tokenManager.setStartNewNumber(true);
-            }
+            // if ("0".equals(currentInput.getValue())) {
+            // tokenManager.setStartNewNumber(true);
+            // }
         } else if (!tokenManager.isEmpty()) {
             handleTokenBackspace();
         }
@@ -222,7 +221,7 @@ public class PrimaryController {
         if (isErrorState())
             return;
 
-        finalizeCurrentNumber();
+        finalizeCurrentInput();
         tokenManager.add(",");
 
         updateExpression();
@@ -248,9 +247,8 @@ public class PrimaryController {
                 ? button.getUserData().toString()
                 : button.getText();
 
-        finalizeCurrentNumber();
+        finalizeCurrentInput();
         tokenManager.add(constant);
-        tokenManager.setStartNewNumber(true);
 
         updateExpression();
     }
@@ -268,25 +266,25 @@ public class PrimaryController {
         if (isErrorState())
             return;
 
-        finalizeCurrentNumber();
+        finalizeCurrentInput();
+
+        tokenManager.trailingOperator();
 
         if (tokenManager.isEmpty())
             return;
-
-        removeTrailingOperator();
 
         try {
             String expression = tokenManager.toExpression();
             double result = new ExpressionParser(expression).evaluate();
             String formattedResult = NumberFormatter.format(result);
 
-            display.setText(formattedResult);
             history.addEntry(expression + " = " + formattedResult);
-
-            currentInput.setValue(formattedResult);
-            tokenManager.clear();
-            tokenManager.setStartNewNumber(true);
             updateHistoryLabel();
+
+            tokenManager.clear();
+            currentInput.setValue(formattedResult);
+            display.setText(formattedResult);
+            finalizeCurrentInput();
         } catch (Exception e) {
             resetToError();
         }
@@ -312,16 +310,17 @@ public class PrimaryController {
      * @return true, если это унарный минус
      */
     // private boolean isUnaryMinus(String operator) {
-    //     return "-".equals(operator) && tokenManager.isStartNewNumber() && tokenManager.canBeUnaryMinus();
+    // return "-".equals(operator) && tokenManager.isStartNewNumber() &&
+    // tokenManager.canBeUnaryMinus();
     // }
 
     /**
      * Обрабатывает унарный минус, начиная новое отрицательное число.
      */
     // private void handleUnaryMinus() {
-    //     currentInput.setValue("-");
-    //     tokenManager.setStartNewNumber(false);
-    //     updateExpression();
+    // currentInput.setValue("-");
+    // tokenManager.setStartNewNumber(false);
+    // updateExpression();
     // }
 
     /**
@@ -330,11 +329,11 @@ public class PrimaryController {
      * Вызывается перед добавлением операторов, функций или скобок.
      * </p>
      */
-    private void finalizeCurrentNumber() {
-        if (!tokenManager.isStartNewNumber() && !currentInput.isEmpty()) {
+    private void finalizeCurrentInput() {
+        if (!currentInput.isEmpty()) {
             tokenManager.add(currentInput.getValue());
-            tokenManager.setStartNewNumber(true);
         }
+        currentInput.clear();
     }
 
     /**
@@ -348,16 +347,6 @@ public class PrimaryController {
 
         if (!tokenManager.isSpecialToken(lastToken) && tokenManager.isNumber(lastToken)) {
             currentInput.setValue(lastToken);
-            tokenManager.setStartNewNumber(false);
-        }
-    }
-
-    /**
-     * Удаляет оператор в конце выражения перед вычислением.
-     */
-    private void removeTrailingOperator() {
-        if (tokenManager.isOperator(tokenManager.getLast())) {
-            tokenManager.removeLast();
         }
     }
 
@@ -376,7 +365,6 @@ public class PrimaryController {
     private void resetToError() {
         display.setText(ERROR_TEXT);
         tokenManager.clear();
-        tokenManager.setStartNewNumber(true);
         currentInput.clear();
     }
 
@@ -386,7 +374,6 @@ public class PrimaryController {
     private void resetState() {
         display.setText("");
         tokenManager.clear();
-        tokenManager.setStartNewNumber(true);
         currentInput.clear();
     }
 
@@ -400,16 +387,16 @@ public class PrimaryController {
         if (display == null || isErrorState())
             return;
 
-        StringBuilder expression = new StringBuilder(tokenManager.toDisplayString());
+        String expression = tokenManager.toDisplayString();
 
-        if (!tokenManager.isStartNewNumber() || tokenManager.isEmpty()) {
-            if (expression.length() > 0) {
-                expression.append(" ");
+        if (!currentInput.isEmpty()) {
+            if (!expression.isEmpty()) {
+                expression += " ";
             }
-            expression.append(currentInput.getValue());
+            expression += currentInput.getValue();
         }
 
-        display.setText(expression.length() == 0 ? currentInput.getValue() : expression.toString());
+        display.setText(expression);
     }
 
     /**

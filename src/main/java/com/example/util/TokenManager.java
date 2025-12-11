@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
  * </p>
  */
 public class TokenManager {
-    private boolean isStartNewNumber = true;
 
     /** Паттерн для распознавания операторов. */
     private static final Pattern OPERATOR_PATTERN = Pattern.compile("[+\\-*/^]");
@@ -22,14 +21,6 @@ public class TokenManager {
 
     /** Список токенов выражения. */
     private final List<String> tokens = new ArrayList<>();
-
-    public boolean isStartNewNumber() {
-        return this.isStartNewNumber;
-    }
-
-    public void setStartNewNumber(boolean startNewNumber) {
-        this.isStartNewNumber = startNewNumber;
-    }
 
     /**
      * Добавляет токен в конец списка.
@@ -135,6 +126,15 @@ public class TokenManager {
      */
     public boolean isOperator(String token) {
         return OPERATOR_PATTERN.matcher(token).matches();
+    }
+
+    /**
+     * Удаляет оператор в конце выражения перед вычислением.
+     */
+    public void trailingOperator() {
+        if (isOperator(getLast())) {
+            removeLast();
+        }
     }
 
     /**
