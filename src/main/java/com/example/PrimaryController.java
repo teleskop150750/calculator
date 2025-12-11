@@ -239,13 +239,11 @@ public class PrimaryController {
     @FXML
     private void onConstant(ActionEvent event) {
         if (isErrorState()) {
-            resetState();
+            return;
         }
 
         Button button = (Button) event.getSource();
-        String constant = button.getUserData() != null
-                ? button.getUserData().toString()
-                : button.getText();
+        String constant = button.getUserData().toString();
 
         finalizeCurrentInput();
         tokenManager.add(constant);
