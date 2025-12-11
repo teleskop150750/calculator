@@ -47,6 +47,14 @@ public class ParserDemo {
         System.out.println("\n=== Тесты завершены ===");
     }
     
+    /**
+     * Тестирует выражение без переменных.
+     * <p>
+     * Парсит выражение, вычисляет результат и выводит RPN для коротких выражений.
+     * </p>
+     * 
+     * @param expression математическое выражение
+     */
     private static void testExpression(String expression) {
         try {
             ExpressionParser parser = new ExpressionParser(expression);
@@ -62,6 +70,15 @@ public class ParserDemo {
         }
     }
     
+    /**
+     * Тестирует выражение с переменными.
+     * <p>
+     * Принимает пары "имя переменной", "значение" и подставляет их перед вычислением.
+     * </p>
+     * 
+     * @param expression математическое выражение
+     * @param varsAndValues массив пар (имя, значение) переменных
+     */
     private static void testExpressionWithVariable(String expression, String... varsAndValues) {
         try {
             ExpressionParser parser = new ExpressionParser(expression);
@@ -83,6 +100,12 @@ public class ParserDemo {
         }
     }
     
+    /**
+     * Преобразует список токенов RPN в строку для отображения.
+     * 
+     * @param rpn список токенов в обратной польской нотации
+     * @return строковое представление RPN
+     */
     private static String rpnToString(java.util.List<Token> rpn) {
         StringBuilder sb = new StringBuilder();
         for (Token token : rpn) {

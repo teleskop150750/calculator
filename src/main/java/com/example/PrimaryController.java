@@ -1,12 +1,12 @@
 package com.example;
 
 import com.example.parser.ExpressionParser;
+import com.example.util.CurrentInput;
 import com.example.util.History;
 import com.example.util.NumberFormatter;
+import com.example.util.TokenManager;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -22,6 +22,7 @@ import javafx.application.Platform;
  * </p>
  */
 public class PrimaryController {
+    private static final String ERROR_TEXT = "Ошибка";
 
     @FXML
     private Label display;
@@ -29,25 +30,26 @@ public class PrimaryController {
     @FXML
     private Label historyLabel;
 
-    /** Флаг: следующая цифра начинает новое число. */
     private boolean startNewNumber = true;
-    /** История вычислений. */
     private final History history = new History();
-    /** Текущие токены выражения в инфиксной записи. */
-    private final List<String> tokens = new ArrayList<>();
-    /** Число, которое сейчас набирает пользователь. */
-    private String currentInput = "0";
+    private final TokenManager tokenManager = new TokenManager();
+    private final CurrentInput currentInput = new CurrentInput();
 
     // ========== Навигация ==========
 
-    /** Переходит на второе окно. */
+    /**
+     * Переключает интерфейс на вторичное окно.
+     * 
+     * @throws IOException если не удалось загрузить FXML
+     */
     @FXML
     private void switchToSecondary() throws IOException {
-        // Простой обработчик навигации для кнопок боковой панели.
         App.setRoot("secondary");
     }
 
-    /** Корректно завершает приложение. */
+    /**
+     * Корректно завершает работу приложения.
+     */
     @FXML
     private void onExit() {
         Platform.exit();
@@ -55,168 +57,149 @@ public class PrimaryController {
 
     // ========== Ввод ==========
 
-    /** Обрабатывает цифровые кнопки и дополняет текущий токен. */
+    /**
+     * Обрабатывает нажатие кнопки с цифрой.
+     * <p>
+     * Если начинается новое число, заменяет текущее значение,
+     * иначе добавляет цифру к существующему.
+     * </p>
+     * 
+     * @param event событие нажатия кнопки
+     */
     @FXML
     private void onDigit(ActionEvent event) {
-        // Добавляет цифру к числу или начинает новое.
-        if (isErrorState())
-            return;
+        if (isErrorState()) return;
 
         String value = ((Button) event.getSource()).getText();
+        
         if (startNewNumber) {
-            currentInput = value;
+            currentInput.setValue(value);
             startNewNumber = false;
         } else {
-            currentInput += value;
+            currentInput.appendDigit(value);
         }
-        updateExpression();
-    }
-
-    /** Вставляет десятичный разделитель, если его ещё нет. */
-    @FXML
-    private void onDecimalPoint() {
-        if (isErrorState())
-            return;
-
-        if (startNewNumber) {
-            currentInput = "0.";
-            startNewNumber = false;
-        } else if (!currentInput.contains(".")) {
-            currentInput += ".";
-        }
+        
         updateExpression();
     }
 
     /**
-     * Добавляет или заменяет арифметический оператор в списке токенов.
+     * Обрабатывает ввод десятичной точки.
      * <p>
-     * Метод обрабатывает ввод бинарных операторов (+, -, ×, ÷) с учётом
-     * текущего состояния калькулятора.
+     * Если начинается новое число, создаёт "0.",
+     * иначе добавляет точку к текущему вводу.
+     * </p>
+     */
+    @FXML
+    private void onDecimalPoint() {
+        if (isErrorState()) return;
+
+        if (startNewNumber) {
+            currentInput.setValue("0.");
+            startNewNumber = false;
+        } else {
+            currentInput.appendDecimalPoint();
+        }
+        
+        updateExpression();
+    }
+
+    /**
+     * Обрабатывает нажатие кнопки оператора (+, -, *, /, ^).
+     * <p>
+     * Обрабатывает специальный случай унарного минуса и
+     * заменяет последний оператор, если он уже был введён.
+     * Игнорирует операторы в начале выражения, кроме унарного минуса.
      * </p>
      * 
-     * <h3>Логика работы:</h3>
-     * <ul>
-     * <li>Если пользователь набирает число, сначала завершаем его ввод
-     * и добавляем число в список токенов</li>
-     * <li>Если предыдущий токен уже оператор – заменяем его новым
-     * (позволяет исправить случайное нажатие)</li>
-     * <li>Иначе добавляем новый оператор после текущего числа</li>
-     * </ul>
-     * 
-     * <h3>Примеры:</h3>
-     * 
-     * <pre>
-     * "5 +" → пользователь нажал '+' после числа 5
-     * "5 + -" → пользователь передумал, нажал '−', результат: "5 -"
-     * "5 + 3 ×" → после полного выражения добавляется новый оператор
-     * </pre>
-     * 
-     * @param event событие кнопки, содержащее текст оператора
+     * @param event событие нажатия кнопки
      */
     @FXML
     private void onOperator(ActionEvent event) {
-        if (isErrorState())
-            return;
+        if (isErrorState()) return;
 
         Button button = (Button) event.getSource();
-        String op = button.getUserData().toString();
+        String operator = button.getUserData().toString();
 
-        // Проверяем, может ли это быть унарный минус
-        boolean canBeUnary = "-".equals(op) && (
-            tokens.isEmpty() || 
-            "(".equals(lastToken()) || 
-            isOperatorToken(lastToken())
-        );
-
-        // Если это унарный минус, добавляем его как префикс к текущему вводу
-        if (canBeUnary && startNewNumber) {
-            currentInput = "-";
-            startNewNumber = false;
-            updateExpression();
+        if (isUnaryMinus(operator)) {
+            handleUnaryMinus();
             return;
         }
 
-        // Если пользователь ещё набирает число, завершаем его ввод
-        if (!startNewNumber && !currentInput.isEmpty()) {
-            tokens.add(currentInput);
-            startNewNumber = true;
+        finalizeCurrentNumber();
+        
+        // Если выражение пустое и ввод пустой, игнорируем оператор (кроме минуса)
+        if (tokenManager.isEmpty() && currentInput.isEmpty()) {
+            return; // Нельзя начинать с бинарного оператора
         }
-
-        // Добавляем или заменяем оператор
-        if (!tokens.isEmpty()) {
-            // Если последний токен – оператор, заменяем его (исправление опечатки)
-            if (isOperatorToken(lastToken())) {
-                tokens.set(tokens.size() - 1, op);
-            } else {
-                // Иначе добавляем новый оператор
-                tokens.add(op);
-            }
+        
+        if (!tokenManager.isEmpty()) {
+            tokenManager.replaceLastOperator(operator);
         } else if (!currentInput.isEmpty()) {
-            // Особый случай: первое число ещё не добавлено в токены
-            tokens.add(currentInput);
-            tokens.add(op);
+            tokenManager.add(currentInput.getValue());
+            tokenManager.add(operator);
             startNewNumber = true;
         }
 
-        updateExpression();
-    }
-
-    /** Добавляет скобки в текущее выражение. */
-    @FXML
-    private void onParen(ActionEvent event) {
-        // Принимает как открывающую, так и закрывающую скобку.
-        if (isErrorState())
-            return;
-
-        String paren = ((Button) event.getSource()).getText();
-
-        if ("(".equals(paren)) {
-            if (!startNewNumber) {
-                tokens.add(currentInput);
-                startNewNumber = true;
-            }
-            tokens.add("(");
-        } else {
-            if (!startNewNumber) {
-                tokens.add(currentInput);
-                startNewNumber = true;
-            }
-            tokens.add(")");
-        }
         updateExpression();
     }
 
     /**
-     * Добавляет функцию как токен в выражение (sin, cos, tan и т.д.).
-     * Функция добавляется с открывающей скобкой для ввода аргумента.
+     * Обрабатывает ввод открывающей или закрывающей скобки.
+     * <p>
+     * Перед добавлением скобки завершает текущий ввод числа.
+     * Предотвращает добавление дублирующей открывающей скобки после функции.
+     * </p>
+     * 
+     * @param event событие нажатия кнопки
+     */
+    @FXML
+    private void onParen(ActionEvent event) {
+        if (isErrorState()) return;
+
+        String paren = ((Button) event.getSource()).getText();
+        
+        finalizeCurrentNumber();
+        
+        // Предотвращаем двойные открывающие скобки после функций
+        if ("(".equals(paren) && "(".equals(tokenManager.getLast())) {
+            return; // Игнорируем дублирующую скобку
+        }
+        
+        tokenManager.add(paren);
+        
+        updateExpression();
+    }
+
+    /**
+     * Обрабатывает ввод функции (sin, cos, sqrt и т.д.).
+     * <p>
+     * Автоматически добавляет открывающую скобку после имени функции.
+     * </p>
+     * 
+     * @param event событие нажатия кнопки
      */
     @FXML
     private void onFunctionToken(ActionEvent event) {
-        if (isErrorState())
-            return;
+        if (isErrorState()) return;
 
         Button button = (Button) event.getSource();
-        // Используем userData для получения имени функции
-        String fn = button.getUserData() != null
-                ? button.getUserData().toString()
-                : button.getText();
+        String function = button.getUserData().toString();
 
-        // Завершаем текущий ввод числа, если нужно
-        if (!startNewNumber && !currentInput.isEmpty()) {
-            tokens.add(currentInput);
-            startNewNumber = true;
-        }
-
-        // Добавляем функцию и открывающую скобку
-        tokens.add(fn);
-        tokens.add("(");
+        finalizeCurrentNumber();
+        
+        tokenManager.add(function);
+        tokenManager.add("(");
 
         updateExpression();
     }
 
     /**
-     * Удаляет последний символ из текущего ввода или последний токен.
-     * Работает как клавиша Backspace.
+     * Обрабатывает удаление последнего символа или токена.
+     * <p>
+     * Если калькулятор в состоянии ошибки, сбрасывает его.
+     * Если вводится число, удаляет последнюю цифру.
+     * Иначе удаляет последний токен из выражения.
+     * </p>
      */
     @FXML
     private void onBackspace() {
@@ -226,108 +209,85 @@ public class PrimaryController {
         }
 
         if (!startNewNumber && currentInput.length() > 0) {
-            // Удаляем символ из текущего числа
-            currentInput = currentInput.substring(0, currentInput.length() - 1);
-            if (currentInput.isEmpty()) {
-                currentInput = "0";
+            currentInput.backspace();
+            if ("0".equals(currentInput.getValue())) {
                 startNewNumber = true;
             }
-        } else if (!tokens.isEmpty()) {
-            // Удаляем последний токен
-            String lastToken = tokens.remove(tokens.size() - 1);
-
-            // Если удалили число (не оператор, не скобку, не константу, не запятую),
-            // восстанавливаем для редактирования
-            boolean isSpecialToken = isOperatorToken(lastToken)
-                    || "(".equals(lastToken)
-                    || ")".equals(lastToken)
-                    || ",".equals(lastToken)
-                    || "pi".equals(lastToken)
-                    || "e".equals(lastToken);
-
-            if (!isSpecialToken && lastToken.matches("\\d+(\\.\\d+)?")) {
-                currentInput = lastToken;
-                startNewNumber = false;
-            }
+        } else if (!tokenManager.isEmpty()) {
+            handleTokenBackspace();
         }
 
         updateExpression();
     }
 
     /**
-     * Добавляет запятую как разделитель аргументов функции.
-     * Используется для функций с несколькими аргументами (например, max).
+     * Обрабатывает ввод разделителя аргументов (запятой) для функций.
      */
     @FXML
     private void onComma() {
-        if (isErrorState())
-            return;
+        if (isErrorState()) return;
 
-        // Завершаем текущий ввод числа
-        if (!startNewNumber && !currentInput.isEmpty()) {
-            tokens.add(currentInput);
-            startNewNumber = true;
-        }
-
-        // Добавляем запятую как разделитель
-        tokens.add(",");
+        finalizeCurrentNumber();
+        tokenManager.add(",");
 
         updateExpression();
     }
 
-    /** Подставляет математические константы π или e в ввод. */
+    /**
+     * Обрабатывает ввод математической константы (π, e).
+     * <p>
+     * Если калькулятор в состоянии ошибки, сбрасывает его.
+     * Получает значение константы из userData кнопки или её текста.
+     * </p>
+     * 
+     * @param event событие нажатия кнопки
+     */
     @FXML
     private void onConstant(ActionEvent event) {
-        // Добавляет константу как токен в выражение.
         if (isErrorState()) {
             resetState();
         }
 
         Button button = (Button) event.getSource();
-        // Используем userData для получения имени константы
         String constant = button.getUserData() != null
                 ? button.getUserData().toString()
                 : button.getText();
 
-        // Завершаем текущий ввод числа, если нужно
-        if (!startNewNumber && !currentInput.isEmpty()) {
-            tokens.add(currentInput);
-            startNewNumber = true;
-        }
-
-        // Добавляем константу как токен
-        tokens.add(constant);
+        finalizeCurrentNumber();
+        tokenManager.add(constant);
         startNewNumber = true;
 
         updateExpression();
     }
 
-    /** Завершает выражение, вычисляет его и сохраняет в истории. */
+    /**
+     * Вычисляет текущее выражение и показывает результат.
+     * <p>
+     * Завершает текущий ввод, удаляет оператор в конце (если есть),
+     * парсит выражение и вычисляет результат. Результат добавляется
+     * в историю и отображается на экране.
+     * </p>
+     */
     @FXML
     private void onEquals() {
-        // Завершает выражение, вычисляет его и обновляет историю.
-        if (isErrorState())
-            return;
+        if (isErrorState()) return;
 
-        if (!startNewNumber) {
-            tokens.add(currentInput);
-        }
-        if (tokens.isEmpty())
-            return;
-        if (isOperatorToken(lastToken())) {
-            tokens.remove(tokens.size() - 1);
-        }
+        finalizeCurrentNumber();
+        
+        if (tokenManager.isEmpty()) return;
+        
+        removeTrailingOperator();
 
         try {
-            String expression = String.join("", tokens);
-            ExpressionParser parser = new ExpressionParser(expression);
-            double result = parser.evaluate();
+            String expression = tokenManager.toExpression();
+            double result = new ExpressionParser(expression).evaluate();
+            String formattedResult = NumberFormatter.format(result);
 
-            display.setText(NumberFormatter.format(result));
-            history.addEntry(expression + " = " + display.getText());
+            display.setText(formattedResult);
+            history.addEntry(expression + " = " + formattedResult);
 
-            currentInput = display.getText();
-            tokens.clear();
+            currentInput.setValue(formattedResult);
+            tokenManager.clear();
             startNewNumber = true;
             updateHistoryLabel();
         } catch (Exception e) {
@@ -335,73 +295,134 @@ public class PrimaryController {
         }
     }
 
-    /** Сбрасывает калькулятор в исходное состояние. */
+    /**
+     * Очищает дисплей и сбрасывает состояние калькулятора.
+     */
     @FXML
     private void onClear() {
         resetState();
     }
 
-    // ========== Вычисления ==========
+    // ========== Вспомогательные методы ==========
 
-    // ========== Утилиты ==========
-
-    /** Проверяет, является ли токен поддерживаемым арифметическим оператором. */
-    private boolean isOperatorToken(String s) {
-        return s.matches("[+\\-*/^]");
+    /**
+     * Проверяет, является ли оператор унарным минусом.
+     * <p>
+     * Унарный минус используется в начале числа или после другого оператора.
+     * </p>
+     * 
+     * @param operator проверяемый оператор
+     * @return true, если это унарный минус
+     */
+    private boolean isUnaryMinus(String operator) {
+        return "-".equals(operator) && startNewNumber && tokenManager.canBeUnaryMinus();
     }
 
-    /** Возвращает последний токен выражения или пустую строку. */
-    private String lastToken() {
-        return tokens.isEmpty() ? "" : tokens.get(tokens.size() - 1);
+    /**
+     * Обрабатывает унарный минус, начиная новое отрицательное число.
+     */
+    private void handleUnaryMinus() {
+        currentInput.setValue("-");
+        startNewNumber = false;
+        updateExpression();
     }
 
-    /** Проверяет, находится ли интерфейс в состоянии ошибки. */
+    /**
+     * Завершает ввод текущего числа, добавляя его в список токенов.
+     * <p>
+     * Вызывается перед добавлением операторов, функций или скобок.
+     * </p>
+     */
+    private void finalizeCurrentNumber() {
+        if (!startNewNumber && !currentInput.isEmpty()) {
+            tokenManager.add(currentInput.getValue());
+            startNewNumber = true;
+        }
+    }
+
+    /**
+     * Обрабатывает удаление последнего токена при нажатии backspace.
+     * <p>
+     * Если удалённый токен — число, восстанавливает его для редактирования.
+     * </p>
+     */
+    private void handleTokenBackspace() {
+        String lastToken = tokenManager.getLastRemoved();
+
+        if (!tokenManager.isSpecialToken(lastToken) && tokenManager.isNumber(lastToken)) {
+            currentInput.setValue(lastToken);
+            startNewNumber = false;
+        }
+    }
+
+    /**
+     * Удаляет оператор в конце выражения перед вычислением.
+     */
+    private void removeTrailingOperator() {
+        if (tokenManager.isOperator(tokenManager.getLast())) {
+            tokenManager.removeLast();
+        }
+    }
+
+    /**
+     * Проверяет, находится ли калькулятор в состоянии ошибки.
+     * 
+     * @return true, если отображается текст ошибки
+     */
     private boolean isErrorState() {
-        return "Ошибка".equals(display.getText());
+        return ERROR_TEXT.equals(display.getText());
     }
 
-    /** Переводит калькулятор в состояние ошибки и очищает ввод. */
+    /**
+     * Переводит калькулятор в состояние ошибки.
+     */
     private void resetToError() {
-        display.setText("Ошибка");
-        tokens.clear();
+        display.setText(ERROR_TEXT);
+        tokenManager.clear();
         startNewNumber = true;
-        currentInput = "0";
+        currentInput.clear();
     }
 
-    /** Очищает выражение, состояние ввода и возвращает дисплей к нулю. */
+    /**
+     * Полностью сбрасывает состояние калькулятора.
+     */
     private void resetState() {
-        display.setText("0");
-        tokens.clear();
+        display.setText("");
+        tokenManager.clear();
         startNewNumber = true;
-        currentInput = "0";
+        currentInput.clear();
     }
 
-    /** Формирует строку выражения, отображаемую на основном дисплее. */
+    /**
+     * Обновляет отображение текущего выражения на экране.
+     * <p>
+     * Формирует строку из токенов и текущего ввода, разделяя их пробелами.
+     * </p>
+     */
     private void updateExpression() {
-        if (display == null)
-            return;
-        if (isErrorState())
-            return;
+        if (display == null || isErrorState()) return;
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < tokens.size(); i++) {
-            if (i > 0)
-                sb.append(" ");
-            sb.append(tokens.get(i));
+        StringBuilder expression = new StringBuilder(tokenManager.toDisplayString());
+        
+        if (!startNewNumber || tokenManager.isEmpty()) {
+            if (expression.length() > 0) {
+                expression.append(" ");
+            }
+            expression.append(currentInput.getValue());
         }
-        if (!startNewNumber || tokens.isEmpty()) {
-            if (sb.length() > 0)
-                sb.append(" ");
-            sb.append(currentInput);
-        }
-        display.setText(sb.length() == 0 ? currentInput : sb.toString());
+
+        display.setText(expression.length() == 0 ? currentInput.getValue() : expression.toString());
     }
 
-    /** Обновляет отображение истории, выводя старые записи сверху. */
+    /**
+     * Обновляет метку с историей вычислений.
+     * <p>
+     * Отображает последние несколько вычислений на экране истории.
+     * </p>
+     */
     private void updateHistoryLabel() {
-        if (historyLabel == null)
-            return;
-
-        historyLabel.setText(history.getFormattedHistory());
+        if (historyLabel != null) {
+            historyLabel.setText(history.getFormattedHistory());
+        }
     }
 }

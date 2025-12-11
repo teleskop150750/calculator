@@ -18,7 +18,7 @@ import java.util.Map;
  * <ol>
  * <li><b>ExpressionTokenizer</b> - разбивает строку на токены</li>
  * <li><b>PrattParser</b> - преобразует токены в RPN</li>
- * <li><b>TokenBasedEvaluator</b> - вычисляет RPN</li>
+ * <li><b>ExpressionEvaluator</b> - вычисляет RPN</li>
  * </ol>
  * 
  * <h3>Пример использования:</h3>

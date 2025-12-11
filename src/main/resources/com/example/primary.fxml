@@ -47,7 +47,7 @@
                     styleClass="history-label" />
 
                 <Label fx:id="display"
-                    text="0"
+                    text=""
                     maxWidth="Infinity"
                     alignment="CENTER_RIGHT"
                     styleClass="display" />
