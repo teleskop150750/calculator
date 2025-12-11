@@ -1,5 +1,8 @@
 package com.example.util;
 
+import javafx.event.ActionEvent;
+import javafx.scene.control.Button;
+
 /**
  * Класс для управления текущим вводом числа пользователем.
  * <p>
@@ -8,35 +11,23 @@ package com.example.util;
  * </p>
  */
 public class CurrentInput {
-    
+
     /** Текущая строка ввода. */
-    private String value;
-    
+    private String value = "";
+
+    private TokenManager tokenManager;
+
     /**
      * Создаёт новый пустой ввод.
      */
-    public CurrentInput() {
-        this.value = "";
+    public CurrentInput(TokenManager tokenManager) {
+        this.tokenManager = tokenManager;
     }
-    
-    /**
-     * Создаёт ввод с начальным значением.
-     * 
-     * @param initialValue начальное значение
-     */
-    public CurrentInput(String initialValue) {
-        this.value = initialValue != null ? initialValue : "";
-    }
-    
-    /**
-     * Возвращает текущее значение.
-     * 
-     * @return строка текущего ввода
-     */
+
     public String getValue() {
-        return value;
+        return this.value;
     }
-    
+
     /**
      * Устанавливает новое значение.
      * 
@@ -45,57 +36,58 @@ public class CurrentInput {
     public void setValue(String value) {
         this.value = value != null ? value : "";
     }
-    
-    /**
-     * Добавляет символ к текущему вводу.
-     * 
-     * @param digit символ для добавления
-     */
-    public void appendDigit(String digit) {
-        this.value += digit;
-    }
-    
-    /**
-     * Добавляет десятичный разделитель, если его ещё нет.
-     * Если ввод пустой, начинает с "0."
-     */
-    public void appendDecimalPoint() {
-        if (value.isEmpty()) {
-            value = "0.";
-        } else if (!value.contains(".")) {
-            value += ".";
+
+    public void onDigit(String value) {
+        if (this.tokenManager.isStartNewNumber()) {
+            this.value = value;
+            this.tokenManager.setStartNewNumber(false);
+        } else {
+            this.value += value;
         }
     }
-    
+
+    public void onDecimalPoint() {
+        if (this.tokenManager.isStartNewNumber()) {
+            this.value = "0.";
+            this.tokenManager.setStartNewNumber(false);
+        } else {
+            if (this.value.isEmpty()) {
+                this.value = "0.";
+            } else if (!this.value.contains(".")) {
+                this.value += ".";
+            }
+        }
+    }
+
     /**
      * Проверяет, пустой ли текущий ввод.
-     * 
+     *
      * @return true, если ввод пустой
      */
     public boolean isEmpty() {
         return value.isEmpty();
     }
-    
-    /**
-     * Проверяет, содержит ли ввод десятичный разделитель.
-     * 
-     * @return true, если содержит точку
-     */
-    public boolean hasDecimalPoint() {
-        return value.contains(".");
-    }
-    
+
+    // /**
+    // * Проверяет, содержит ли ввод десятичный разделитель.
+    // *
+    // * @return true, если содержит точку
+    // */
+    // public boolean hasDecimalPoint() {
+    // return value.contains(".");
+    // }
+
     /**
      * Очищает текущий ввод.
      */
     public void clear() {
         value = "";
     }
-    
+
     /**
      * Удаляет последний символ из ввода.
      * Если после удаления ввод становится пустым, устанавливает "0".
-     * 
+     *
      * @return true, если символ был удалён
      */
     public boolean backspace() {
@@ -108,27 +100,27 @@ public class CurrentInput {
         }
         return false;
     }
-    
-    /**
-     * Возвращает длину текущего ввода.
-     * 
-     * @return количество символов
-     */
-    public int length() {
-        return value.length();
-    }
-    
-    /**
-     * Проверяет, является ли текущий ввод числом.
-     * 
-     * @return true, если ввод соответствует формату числа
-     */
-    public boolean isNumber() {
-        return value.matches("-?\\d+(\\.\\d+)?");
-    }
-    
-    @Override
-    public String toString() {
-        return value;
-    }
+
+    // /**
+    // * Возвращает длину текущего ввода.
+    // *
+    // * @return количество символов
+    // */
+    // public int length() {
+    // return value.length();
+    // }
+
+    // /**
+    // * Проверяет, является ли текущий ввод числом.
+    // *
+    // * @return true, если ввод соответствует формату числа
+    // */
+    // public boolean isNumber() {
+    // return value.matches("-?\\d+(\\.\\d+)?");
+    // }
+
+    // @Override
+    // public String toString() {
+    // return value;
+    // }
 }

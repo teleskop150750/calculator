@@ -60,7 +60,7 @@ public class ExpressionTokenizer {
         // Проверка на неизвестные токены (игнорируем пробелы)
         List<Token> unknownTokens = new ArrayList<>();
         for (Token token : tokens) {
-            if (token.getType() == TokenType.UNKNOWN && !token.getValue().matches("\\s+")) {
+            if (token.getType() == TokenType.UNKNOWN) {
                 unknownTokens.add(token);
             }
         }

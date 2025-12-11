@@ -12,14 +12,24 @@ import java.util.regex.Pattern;
  * </p>
  */
 public class TokenManager {
+    private boolean isStartNewNumber = true;
+
     /** Паттерн для распознавания операторов. */
     private static final Pattern OPERATOR_PATTERN = Pattern.compile("[+\\-*/^]");
-    
+
     /** Паттерн для распознавания чисел. */
     private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+(\\.\\d+)?");
-    
+
     /** Список токенов выражения. */
     private final List<String> tokens = new ArrayList<>();
+
+    public boolean isStartNewNumber() {
+        return this.isStartNewNumber;
+    }
+
+    public void setStartNewNumber(boolean startNewNumber) {
+        this.isStartNewNumber = startNewNumber;
+    }
 
     /**
      * Добавляет токен в конец списка.
@@ -48,8 +58,8 @@ public class TokenManager {
      * 
      * @param newOperator новый оператор
      */
-    public void replaceLastOperator(String newOperator) {
-        if (!tokens.isEmpty() && isOperator(getLast())) {
+    public void replaceOrAddOperator(String newOperator) {
+        if (isOperator(getLast())) {
             tokens.set(tokens.size() - 1, newOperator);
         } else {
             tokens.add(newOperator);
@@ -67,7 +77,7 @@ public class TokenManager {
 
     /**
      * Удаляет и возвращает последний токен.
-     * 
+     *
      * @return удалённый токен или пустая строка
      */
     public String getLastRemoved() {
@@ -90,18 +100,18 @@ public class TokenManager {
         tokens.clear();
     }
 
-    /**
-     * Возвращает копию списка токенов.
-     * 
-     * @return список токенов
-     */
-    public List<String> getTokens() {
-        return new ArrayList<>(tokens);
-    }
+    // /**
+    // * Возвращает копию списка токенов.
+    // *
+    // * @return список токенов
+    // */
+    // public List<String> getTokens() {
+    // return new ArrayList<>(tokens);
+    // }
 
     /**
      * Формирует выражение для вычисления (без пробелов).
-     * 
+     *
      * @return строка выражения
      */
     public String toExpression() {
@@ -110,7 +120,7 @@ public class TokenManager {
 
     /**
      * Формирует выражение для отображения (с пробелами).
-     * 
+     *
      * @return строка для показа пользователю
      */
     public String toDisplayString() {
@@ -129,7 +139,7 @@ public class TokenManager {
 
     /**
      * Проверяет, является ли токен числом.
-     * 
+     *
      * @param token проверяемый токен
      * @return true, если токен — число
      */
@@ -139,31 +149,30 @@ public class TokenManager {
 
     /**
      * Проверяет, является ли токен специальным (оператор, скобка, константа).
-     * 
+     *
      * @param token проверяемый токен
      * @return true, если токен специальный
      */
     public boolean isSpecialToken(String token) {
-        return isOperator(token) || 
-               "(".equals(token) || 
-               ")".equals(token) || 
-               ",".equals(token) || 
-               "pi".equals(token) || 
-               "e".equals(token);
+        return isOperator(token) ||
+                "(".equals(token) ||
+                ")".equals(token) ||
+                ",".equals(token) ||
+                "pi".equals(token) ||
+                "e".equals(token);
     }
 
-    /**
-     * Проверяет, может ли следующий минус быть унарным.
-     * <p>
-     * Унарный минус возможен в начале выражения, после открывающей
-     * скобки или после другого оператора.
-     * </p>
-     * 
-     * @return true, если унарный минус допустим
-     */
-    public boolean canBeUnaryMinus() {
-        return tokens.isEmpty() || 
-               "(".equals(getLast()) || 
-               isOperator(getLast());
-    }
+    // /**
+    // * Проверяет, может ли следующий минус быть унарным.
+    // * <p>
+    // * Унарный минус возможен в начале выражения, после открывающей
+    // * скобки или после другого оператора.
+    // * </p>
+    // *
+    // * @return true, если унарный минус допустим
+    // */
+    // public boolean canBeUnaryMinus() {
+    // return "(".equals(getLast()) ||
+    // isOperator(getLast());
+    // }
 }
