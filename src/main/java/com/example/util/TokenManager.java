@@ -115,7 +115,7 @@ public class TokenManager {
      * @return строка для показа пользователю
      */
     public String toDisplayString() {
-        return String.join(" ", tokens);
+        return String.join("", tokens);
     }
 
     /**
