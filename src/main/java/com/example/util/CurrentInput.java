@@ -74,16 +74,12 @@ public class CurrentInput {
 
     /**
      * Удаляет последний символ из ввода.
-     * Если после удаления ввод становится пустым, устанавливает "0".
      *
      * @return true, если символ был удалён
      */
     public boolean backspace() {
         if (value.length() > 0) {
             value = value.substring(0, value.length() - 1);
-            if (value.isEmpty()) {
-                value = "0";
-            }
             return true;
         }
         return false;

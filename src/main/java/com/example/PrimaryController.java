@@ -203,11 +203,12 @@ public class PrimaryController {
 
         if (!currentInput.isEmpty()) {
             currentInput.backspace();
-            // if ("0".equals(currentInput.getValue())) {
-            // tokenManager.setStartNewNumber(true);
-            // }
         } else if (!tokenManager.isEmpty()) {
-            handleTokenBackspace();
+            String lastToken = tokenManager.getLastRemoved();
+
+            if (tokenManager.isNumber(lastToken)) {
+                currentInput.setValue(lastToken);
+            }
         }
 
         updateExpression();
@@ -332,20 +333,6 @@ public class PrimaryController {
             tokenManager.add(currentInput.getValue());
         }
         currentInput.clear();
-    }
-
-    /**
-     * Обрабатывает удаление последнего токена при нажатии backspace.
-     * <p>
-     * Если удалённый токен — число, восстанавливает его для редактирования.
-     * </p>
-     */
-    private void handleTokenBackspace() {
-        String lastToken = tokenManager.getLastRemoved();
-
-        if (!tokenManager.isSpecialToken(lastToken) && tokenManager.isNumber(lastToken)) {
-            currentInput.setValue(lastToken);
-        }
     }
 
     /**
