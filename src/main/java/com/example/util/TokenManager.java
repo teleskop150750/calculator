@@ -147,21 +147,6 @@ public class TokenManager {
         return NUMBER_PATTERN.matcher(token).matches();
     }
 
-    /**
-     * Проверяет, является ли токен специальным (оператор, скобка, константа).
-     *
-     * @param token проверяемый токен
-     * @return true, если токен специальный
-     */
-    public boolean isSpecialToken(String token) {
-        return isOperator(token) ||
-                "(".equals(token) ||
-                ")".equals(token) ||
-                ",".equals(token) ||
-                "pi".equals(token) ||
-                "e".equals(token);
-    }
-
     // /**
     // * Проверяет, может ли следующий минус быть унарным.
     // * <p>
