@@ -1,4 +1,4 @@
-package com.example.parser;
+package com.example.expression;
 
 /**
  * Типы токенов математического выражения.

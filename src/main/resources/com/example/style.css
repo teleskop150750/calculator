@@ -1,252 +1,277 @@
 .root {
-    -fx-font-family: "Inter", "Segoe UI", "Roboto", "Sans-Serif";
-    -fx-background-color: #f1f2f6;
+  -fx-font-family: "Inter", "Segoe UI", "Roboto", "Sans-Serif";
+  -fx-background-color: #f1f2f6;
 }
 
 .card {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e5e7eb;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 16, 0.3, 0, 4);
+  -fx-background-color: #ffffff;
+  -fx-border-color: #e5e7eb;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 16, 0.3, 0, 4);
 }
 
 /* Меню */
 .menu-bar {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e5e7eb;
-    -fx-border-width: 0 0 1 0;
-    -fx-padding: 6 10 6 10;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 8, 0.2, 0, 2);
+  -fx-background-color: #ffffff;
+  -fx-border-color: #e5e7eb;
+  -fx-border-width: 0 0 1 0;
+  -fx-padding: 6 10 6 10;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 8, 0.2, 0, 2);
 }
 
 .menu {
-    -fx-padding: 4 12 4 12;
+  -fx-padding: 4 12 4 12;
 }
 
 .menu .label {
-    -fx-text-fill: #374151;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
+  -fx-text-fill: #374151;
+  -fx-font-size: 13px;
+  -fx-font-weight: 600;
 }
 
 .menu:hover,
 .menu:showing {
-    -fx-background-color: #f3f4f6;
-    -fx-background-radius: 6;
+  -fx-background-color: #f3f4f6;
+  -fx-background-radius: 6;
 }
 
 .menu:hover .label,
 .menu:showing .label {
-    -fx-text-fill: #4338ca;
+  -fx-text-fill: #4338ca;
 }
 
 .context-menu {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
-    -fx-border-color: #e5e7eb;
-    -fx-border-width: 1;
-    -fx-padding: 6 0 6 0;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 20, 0.4, 0, 6);
+  -fx-background-color: #ffffff;
+  -fx-background-radius: 10;
+  -fx-border-radius: 10;
+  -fx-border-color: #e5e7eb;
+  -fx-border-width: 1;
+  -fx-padding: 6 0 6 0;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 20, 0.4, 0, 6);
 }
 
 .menu-item {
-    -fx-padding: 6 20 6 20;
+  -fx-padding: 6 20 6 20;
 }
 
 .menu-item .label {
-    -fx-text-fill: #374151;
-    -fx-font-size: 13px;
+  -fx-text-fill: #374151;
+  -fx-font-size: 13px;
 }
 
 .menu-item:focused {
-    -fx-background-color: #eef2ff;
+  -fx-background-color: #eef2ff;
 }
 
 .menu-item:focused .label {
-    -fx-text-fill: #4338ca;
+  -fx-text-fill: #4338ca;
 }
 
 /* История */
 .history-label {
-    -fx-background-color: #fafbfc;
-    -fx-text-fill: #374151;
-    -fx-font-size: 12px;
-    -fx-line-spacing: 2;
-    -fx-padding: 10;
-    -fx-border-color: #e5e7eb;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
+  -fx-background-color: #fafbfc;
+  -fx-text-fill: #374151;
+  -fx-font-size: 12px;
+  -fx-line-spacing: 2;
+  -fx-padding: 10;
+  -fx-border-color: #e5e7eb;
+  -fx-border-radius: 8;
+  -fx-background-radius: 8;
+  -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
 }
 
 /* Дисплей */
 .display {
-    -fx-background-color: #ffffff;
-    -fx-text-fill: #111827;
-    -fx-font-size: 20px;
-    -fx-font-weight: 600;
-    -fx-padding: 12;
-    -fx-border-color: #e5e7eb;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0.25, 0, 2);
+  -fx-background-color: #ffffff;
+  -fx-text-fill: #111827;
+  -fx-font-size: 20px;
+  -fx-font-weight: 600;
+  -fx-padding: 12;
+  -fx-border-color: #e5e7eb;
+  -fx-border-radius: 10;
+  -fx-background-radius: 10;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 10, 0.25, 0, 2);
 }
 
 /* Сегменты */
 .segment {
-    -fx-background-color: #f3f4f6;
-    -fx-text-fill: #4b5563;
-    -fx-font-weight: 600;
-    -fx-padding: 8 14 8 14;
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
-    -fx-border-color: #e5e7eb;
+  -fx-background-color: #f3f4f6;
+  -fx-text-fill: #4b5563;
+  -fx-font-weight: 600;
+  -fx-padding: 8 14 8 14;
+  -fx-background-radius: 10;
+  -fx-border-radius: 10;
+  -fx-border-color: #e5e7eb;
 }
 .segment-active {
-    -fx-background-color: #eef2ff;
-    -fx-text-fill: #4338ca;
-    -fx-border-color: #c7d2fe;
+  -fx-background-color: #eef2ff;
+  -fx-text-fill: #4338ca;
+  -fx-border-color: #c7d2fe;
 }
 .segment-rad {
-    -fx-background-color: #e0e7ff;
-    -fx-text-fill: #4338ca;
+  -fx-background-color: #e0e7ff;
+  -fx-text-fill: #4338ca;
 }
 
 /* Кнопки */
 .button {
-    -fx-background-color: #ffffff;
-    -fx-text-fill: #1f2937;
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
-    -fx-border-color: #e5e7eb;
-    -fx-border-width: 1;
-    -fx-padding: 8 0 8 0;
+  -fx-background-color: #ffffff;
+  -fx-text-fill: #1f2937;
+  -fx-font-size: 14px;
+  -fx-font-weight: 600;
+  -fx-background-radius: 10;
+  -fx-border-radius: 10;
+  -fx-border-color: #e5e7eb;
+  -fx-border-width: 1;
+  -fx-padding: 8 0 8 0;
 }
-.button:hover { -fx-background-color: #f3f4f6; }
-.button:pressed { -fx-background-color: #e5e7eb; }
+.button:hover {
+  -fx-background-color: #f3f4f6;
+}
+.button:pressed {
+  -fx-background-color: #e5e7eb;
+}
 
 .btn-ghost {
-    -fx-background-color: #eef2ff;
-    -fx-text-fill: #4338ca;
-    -fx-border-color: #dfe4ff;
+  -fx-background-color: #eef2ff;
+  -fx-text-fill: #4338ca;
+  -fx-border-color: #dfe4ff;
 }
-.btn-ghost:hover { -fx-background-color: #e0e7ff; }
+.btn-ghost:hover {
+  -fx-background-color: #e0e7ff;
+}
 
 .btn-accent {
-    -fx-background-color: #4338ca;
-    -fx-text-fill: #ffffff;
-    -fx-border-color: #4338ca;
+  -fx-background-color: #4338ca;
+  -fx-text-fill: #ffffff;
+  -fx-border-color: #4338ca;
 }
-.btn-accent:hover { -fx-background-color: #4f46e5; }
-.btn-accent:pressed { -fx-background-color: #3730a3; }
+.btn-accent:hover {
+  -fx-background-color: #4f46e5;
+}
+.btn-accent:pressed {
+  -fx-background-color: #3730a3;
+}
 
 /* Группы функций - Tailwind цвета */
 
 /* Тригонометрия - Violet */
 .btn-trig {
-    -fx-background-color: #ede9fe;
-    -fx-text-fill: #7c3aed;
-    -fx-border-color: #ddd6fe;
+  -fx-background-color: #ede9fe;
+  -fx-text-fill: #7c3aed;
+  -fx-border-color: #ddd6fe;
 }
-.btn-trig:hover { -fx-background-color: #ddd6fe; }
+.btn-trig:hover {
+  -fx-background-color: #ddd6fe;
+}
 
 /* Логарифмы - Sky */
 .btn-log {
-    -fx-background-color: #e0f2fe;
-    -fx-text-fill: #0284c7;
-    -fx-border-color: #bae6fd;
+  -fx-background-color: #e0f2fe;
+  -fx-text-fill: #0284c7;
+  -fx-border-color: #bae6fd;
 }
-.btn-log:hover { -fx-background-color: #bae6fd; }
+.btn-log:hover {
+  -fx-background-color: #bae6fd;
+}
 
 /* Специальные функции - Emerald */
 .btn-operator {
-    -fx-background-color: #d1fae5;
-    -fx-text-fill: #059669;
-    -fx-border-color: #a7f3d0;
+  -fx-background-color: #d1fae5;
+  -fx-text-fill: #059669;
+  -fx-border-color: #a7f3d0;
 }
-.btn-operator:hover { -fx-background-color: #a7f3d0; }
+.btn-operator:hover {
+  -fx-background-color: #a7f3d0;
+}
 
 /* Константы - Amber */
 .btn-const {
-    -fx-background-color: #fef3c7;
-    -fx-text-fill: #d97706;
-    -fx-border-color: #fde68a;
+  -fx-background-color: #fef3c7;
+  -fx-text-fill: #d97706;
+  -fx-border-color: #fde68a;
 }
-.btn-const:hover { -fx-background-color: #fde68a; }
+.btn-const:hover {
+  -fx-background-color: #fde68a;
+}
 
 /* Управление - Rose */
 .btn-control {
-    -fx-background-color: #ffe4e6;
-    -fx-text-fill: #e11d48;
-    -fx-border-color: #fecdd3;
+  -fx-background-color: #ffe4e6;
+  -fx-text-fill: #e11d48;
+  -fx-border-color: #fecdd3;
 }
-.btn-control:hover { -fx-background-color: #fecdd3; }
+.btn-control:hover {
+  -fx-background-color: #fecdd3;
+}
 
 /* Скобки - Cyan */
 .btn-bracket {
-    -fx-background-color: #cffafe;
-    -fx-text-fill: #0891b2;
-    -fx-border-color: #a5f3fc;
+  -fx-background-color: #cffafe;
+  -fx-text-fill: #0891b2;
+  -fx-border-color: #a5f3fc;
 }
-.btn-bracket:hover { -fx-background-color: #a5f3fc; }
-
+.btn-bracket:hover {
+  -fx-background-color: #a5f3fc;
+}
 
 .grid-pane {
-    -fx-hgap: 8;
-    -fx-vgap: 8;
-    -fx-padding: 4 0 0 0;
+  -fx-hgap: 8;
+  -fx-vgap: 8;
+  -fx-padding: 4 0 0 0;
 }
 .grid-pane .button {
-    -fx-max-width: Infinity;
-    -fx-pref-height: 38;
+  -fx-max-width: Infinity;
+  -fx-pref-height: 38;
 }
 
 /* Экран "О программе" */
 .about-card {
-    -fx-max-width: 480;
+  -fx-max-width: 480;
 }
 
 .about-title {
-    -fx-font-size: 32px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #4338ca;
+  -fx-font-size: 32px;
+  -fx-font-weight: bold;
+  -fx-text-fill: #4338ca;
 }
 
 .about-subtitle {
-    -fx-font-size: 16px;
-    -fx-text-fill: #6b7280;
-    -fx-font-weight: 500;
+  -fx-font-size: 16px;
+  -fx-text-fill: #6b7280;
+  -fx-font-weight: 500;
 }
 
 .about-section {
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-    -fx-text-fill: #374151;
+  -fx-font-size: 14px;
+  -fx-font-weight: 600;
+  -fx-text-fill: #374151;
 }
 
 .about-text {
-    -fx-font-size: 13px;
-    -fx-text-fill: #6b7280;
-    -fx-padding: 2 0 0 10;
+  -fx-font-size: 13px;
+  -fx-text-fill: #6b7280;
+  -fx-padding: 2 0 0 10;
 }
 
 .about-version {
-    -fx-font-size: 12px;
-    -fx-text-fill: #9ca3af;
-    -fx-font-style: italic;
+  -fx-font-size: 12px;
+  -fx-text-fill: #9ca3af;
+  -fx-font-style: italic;
 }
 
 .btn-back {
-    -fx-background-color: #4338ca;
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-    -fx-padding: 10 24 10 24;
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
-    -fx-border-color: #4338ca;
+  -fx-background-color: #4338ca;
+  -fx-text-fill: #ffffff;
+  -fx-font-size: 14px;
+  -fx-font-weight: 600;
+  -fx-padding: 10 24 10 24;
+  -fx-background-radius: 10;
+  -fx-border-radius: 10;
+  -fx-border-color: #4338ca;
 }
-.btn-back:hover { -fx-background-color: #4f46e5; }
-.btn-back:pressed { -fx-background-color: #3730a3; }
+.btn-back:hover {
+  -fx-background-color: #4f46e5;
+}
+.btn-back:pressed {
+  -fx-background-color: #3730a3;
+}

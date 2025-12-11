@@ -1,9 +1,6 @@
-package com.example.parser;
-
-import com.example.evaluator.ExpressionEvaluator;
+package com.example.expression;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +36,7 @@ public class PrattParser {
      */
     public PrattParser(Map<String, ExpressionEvaluator.FunctionDef> functions) {
         this.functions = functions;
-        this.precedence = initPrecedence();
+        this.precedence = ExpressionDefinitions.OPERATOR_PRECEDENCE;
     }
     
     /**
@@ -246,31 +243,4 @@ public class PrattParser {
         return filtered;
     }
     
-    /**
-     * Инициализирует приоритеты операторов.
-     * <p>
-     * Чем выше число, тем выше приоритет.
-     * </p>
-     */
-    private Map<String, Integer> initPrecedence() {
-        Map<String, Integer> prec = new HashMap<>();
-        
-        // Сложение и вычитание
-        prec.put("+", 10);
-        prec.put("-", 10);
-        
-        // Умножение и деление
-        prec.put("*", 20);
-        prec.put("×", 20);
-        prec.put("/", 20);
-        prec.put("÷", 20);
-        
-        // Возведение в степень
-        prec.put("^", 30);
-        
-        // Унарный минус
-        prec.put("~", 40);
-        
-        return prec;
-    }
 }

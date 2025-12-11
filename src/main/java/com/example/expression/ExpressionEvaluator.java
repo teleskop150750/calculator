@@ -1,10 +1,7 @@
-package com.example.evaluator;
-
-import com.example.parser.Token;
+package com.example.expression;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -75,11 +72,10 @@ public class ExpressionEvaluator {
      * Создаёт вычислитель с настройками по умолчанию.
      */
     public static ExpressionEvaluator createDefault() {
-        Map<String, Double> constants = initConstants();
-        Map<String, FunctionDef> functions = initFunctions();
-        Map<String, OperatorDef> operators = initOperators();
-
-        return new ExpressionEvaluator(constants, functions, operators);
+        return new ExpressionEvaluator(
+                ExpressionDefinitions.CONSTANTS,
+                ExpressionDefinitions.FUNCTIONS,
+                ExpressionDefinitions.OPERATORS);
     }
 
     /**
@@ -222,66 +218,4 @@ public class ExpressionEvaluator {
         }
     }
 
-    /**
-     * Инициализирует константы по умолчанию.
-     */
-    private static Map<String, Double> initConstants() {
-        Map<String, Double> constants = new HashMap<>();
-        constants.put("pi", Math.PI);
-        constants.put("π", Math.PI);
-        constants.put("e", Math.E);
-        return constants;
-    }
-
-    /**
-     * Инициализирует функции по умолчанию.
-     */
-    private static Map<String, FunctionDef> initFunctions() {
-        Map<String, FunctionDef> functions = new HashMap<>();
-
-        // Тригонометрические функции (в радианах)
-        functions.put("sin", new FunctionDef(1, args -> Math.sin(args[0])));
-        functions.put("cos", new FunctionDef(1, args -> Math.cos(args[0])));
-        functions.put("tan", new FunctionDef(1, args -> Math.tan(args[0])));
-        functions.put("cot", new FunctionDef(1, args -> 1.0 / Math.tan(args[0])));
-
-        // Логарифмы
-        functions.put("ln", new FunctionDef(1, args -> Math.log(args[0])));
-        functions.put("log", new FunctionDef(1, args -> Math.log10(args[0])));
-
-        // Алгебраические функции
-        functions.put("sqrt", new FunctionDef(1, args -> Math.sqrt(args[0])));
-        functions.put("√", new FunctionDef(1, args -> Math.sqrt(args[0])));
-        functions.put("abs", new FunctionDef(1, args -> Math.abs(args[0])));
-        functions.put("exp", new FunctionDef(1, args -> Math.exp(args[0])));
-
-        // Многоаргументные функции
-        functions.put("max", new FunctionDef(2, args -> Math.max(args[0], args[1])));
-        functions.put("min", new FunctionDef(2, args -> Math.min(args[0], args[1])));
-
-        return functions;
-    }
-
-    /**
-     * Инициализирует операторы по умолчанию.
-     */
-    private static Map<String, OperatorDef> initOperators() {
-        Map<String, OperatorDef> operators = new HashMap<>();
-
-        operators.put("+", new OperatorDef(2, args -> args[0] + args[1]));
-        operators.put("-", new OperatorDef(2, args -> args[0] - args[1]));
-        operators.put("*", new OperatorDef(2, args -> args[0] * args[1]));
-        operators.put("/", new OperatorDef(2, args -> {
-            if (Math.abs(args[1]) < 1e-10) {
-                throw new ArithmeticException("Деление на ноль");
-            }
-            return args[0] / args[1];
-        }));
-        operators.put("^", new OperatorDef(2, args -> Math.pow(args[0], args[1])));
-
-        // Унарный минус
-        operators.put("~", new OperatorDef(1, args -> -args[0]));
-
-        return operators;
-    }
 }

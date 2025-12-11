@@ -1,7 +1,7 @@
 package com.example;
 
-import com.example.parser.ExpressionParser;
-import com.example.parser.Token;
+import com.example.expression.ExpressionParser;
+import com.example.expression.Token;
 import com.example.util.NumberFormatter;
 
 /**

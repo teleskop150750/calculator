@@ -1,6 +1,6 @@
 package com.example;
 
-import com.example.parser.ExpressionParser;
+import com.example.expression.ExpressionParser;
 import com.example.util.CurrentInput;
 import com.example.util.History;
 import com.example.util.NumberFormatter;
